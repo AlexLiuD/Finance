@@ -53,13 +53,13 @@
     <hr />
     <div class="container-fluid">
         <div id="toolbar" class="btn-group">
-            <button type="button" class="btn btn-default">
+            <button type="button" class="btn btn-success">
                 <i class="glyphicon glyphicon-random"> 同步数据</i>
             </button>
-            <button type="button" class="btn btn-default">
+            <button type="button" class="btn btn-info">
                 <i class="glyphicon glyphicon-heart"> 更新数据</i>
             </button>
-            <button type="button" class="btn btn-default">
+            <button type="button" class="btn btn-inverse">
                 <i class="glyphicon glyphicon-cloud-download"> 导出数据</i>
             </button>
         </div>
@@ -77,8 +77,10 @@
                        data-show-columns="true"
                        data-toolbar="#toolbar"
                        data-pagination="true"
-                       data-page-list="[10,20, 50,100]"
-                       data-height="525">
+                       data-page-size=20
+                       data-page-list="[20, 50,100]"
+                       data-query-params="queryParams"
+                       data-height="900">
                     <thead>
                         <tr>
                             <th data-field="state" data-checkbox="true"></th>
@@ -201,6 +203,16 @@
             };
         }
         return {};
+    }
+
+    function queryParams() {
+        return {
+            type: 'owner',
+            sort: '订单号',
+            direction: 'desc',
+            per_page: 20,
+            page: 1
+        };
     }
 </script>
 
