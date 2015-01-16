@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - 我的 ASP.NET 应用程序</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/top")
+    @Scripts.Render("~/bundles/bootstrap-table")
+    @RenderSection("scripts", required: false)
+</head>
+<body id="top">
+    <div class="navbar navbar-default navbar-fixed-top">
+        <p id="back-to-top"><a href="#top"><span></span>返回顶部</a></p>
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="#importDiv" class="navbar-brand">订单数据处理</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="#importDiv">数据导入</a></li>
+                    <li><a href="#handleDiv">数据处理</a></li>
+                    <li><a href="#exportDiv">数据导出</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - 我的 ASP.NET 应用程序</p>
+        </footer>
+    </div>
+
+
+</body>
+</html>

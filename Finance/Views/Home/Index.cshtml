@@ -1,0 +1,206 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="list-group" id="importDiv">
+    @using (Html.BeginForm("Index", "Home", FormMethod.Post, new { id = "myform", enctype = "multipart/form-data", @class = "form-horizontal" }))
+    {
+        <hr />
+        <a href="#" class="list-group-item active">
+            <h2 class="list-group-item-heading">数据导入...</h2>
+        </a>
+        <hr />
+        <div class="content">
+            <div>
+                <select class="selectpicker show-tick" data-style="btn-warning" data-width="279px">
+                    <option>京东</option>
+                    <option>一号店</option>
+                    <option>苏宁易购</option>
+                </select>
+            </div>
+            <br />
+            <input type="file" name="files" class="btn btn-danger" />
+            <br />
+            <input type="submit" name="btnIn" id="btnIn" value="导 入 <<" class="btn btn-success" />
+        </div>
+        <br />
+        if (!string.IsNullOrEmpty(ViewBag.Success))
+        {
+            <div class="alert alert-success">
+                <a href="#" class="close" data-dismiss="alert">
+                    &times;
+                </a>@ViewBag.Success
+            </div>
+        }
+        if (!string.IsNullOrEmpty(ViewBag.Error))
+        {
+            <div class="alert alert-danger">
+                <a href="#" class="close" data-dismiss="alert">
+                    &times;
+                </a>@ViewBag.Error
+            </div>
+        }
+    }
+    <div id="myLoadingElement" style="display: none;">
+        <img src="~/Content/images/loading.gif" alt="Loading..." />
+    </div>
+</div>
+<div class="list-group" id="handleDiv">
+    <hr />
+    <a href="#" class="list-group-item active">
+        <h2 class="list-group-item-heading">数据处理...</h2>
+    </a>
+    <hr />
+    <div class="container-fluid">
+        <div id="toolbar" class="btn-group">
+            <button type="button" class="btn btn-default">
+                <i class="glyphicon glyphicon-random"> 同步数据</i>
+            </button>
+            <button type="button" class="btn btn-default">
+                <i class="glyphicon glyphicon-heart"> 更新数据</i>
+            </button>
+            <button type="button" class="btn btn-default">
+                <i class="glyphicon glyphicon-cloud-download"> 导出数据</i>
+            </button>
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
+                <table data-toggle="table"
+                       data-url="/Home/GetData/"
+                       data-click-to-select="true"
+                       data-row-style="rowStyle"
+                       data-search="true"
+                       data-sort-name="订单号"
+                       data-sort-order="desc"
+                       data-show-refresh="true"
+                       data-show-toggle="true"
+                       data-show-columns="true"
+                       data-toolbar="#toolbar"
+                       data-pagination="true"
+                       data-page-list="[10,20, 50,100]"
+                       data-height="525">
+                    <thead>
+                        <tr>
+                            <th data-field="state" data-checkbox="true"></th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="客户类型">客户类型</th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="客户">客户</th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="订单号">订单号</th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="发票种类">发票种类</th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="收票单位">收票单位</th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="客户是否要票">客户是否要票</th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="单位">单位</th>
+                            <th data-sortable="true" data-halign="center" data-align="right" data-field="数量">数量</th>
+                            <th data-sortable="true" data-halign="center" data-align="right" data-field="单价">单价</th>
+                            <th data-sortable="true" data-halign="center" data-align="right" data-field="运费">运费</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="list-group" id="exportDiv">
+    <hr />
+    <a href="#" class="list-group-item active">
+        <h2 class="list-group-item-heading">数据导出...</h2>
+    </a>
+    <hr />
+    <form action="" class="form-horizontal" role="form" id="exportForm" method="POST">
+        <div class="form-group">
+            <label for="beginDateTime" class="col-md-1">起始时间:</label>
+            <div class="input-group date form_datetime col-md-4" data-link-field="beginDateTime" data-date-format="yyyy MM dd -p HH:ii">
+                <input class="form-control" size="16" type="text" value="" readonly>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+            </div>
+            <input type="hidden" id="beginDateTime" value="" /><br />
+            <br />
+        </div>
+        <div class="form-group">
+            <label for="endDateTime" class="col-md-1">结束时间:</label>
+            <div class="input-group date form_datetime col-md-4" data-link-field="endDateTime" data-date-format="yyyy MM dd -p HH:ii">
+                <input class="form-control" size="16" type="text" value="" readonly>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+            </div>
+            <input type="hidden" id="endDateTime" value="" /><br />
+            <br />
+        </div>
+        <div>
+            <input type="button" name="btnOut" id="btnOut" value="导 出 >>" class="btn btn-success " />
+        </div>
+    </form>
+    <br />
+    <div class="alert alert-warning " id="myAlert" style="display:none">
+        <a href="#" class="close" data-dismiss="alert">
+            &times;
+        </a>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //$('.selectpicker').selectpicker({
+    //    style:"btn-warning",
+    //    size: 5
+    //});
+    $("#myform").submit(function (e) {
+        $("#myLoadingElement").show();
+    });
+    $('.form_datetime').datetimepicker({
+        language: 'zh-CN',
+        weekStart: 1,
+        todayBtn: 1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        forceParse: 0,
+        showMeridian: 1
+    });
+
+    $("#btnOut").click(function () {
+        $("#myAlert").hide();
+        $("#myAlert").html("")
+        //if (!$("#beginDateTime").val()) {
+        //    $("#myAlert").html("<strong>起始时间不能为空</strong>")
+        //    $("#myAlert").show();
+        //    return false;
+        //}
+        //if (!$("#endDateTime").val()) {
+        //    $("#myAlert").html("<strong>结束时间不能为空</strong>")
+        //    $("#myAlert").show();
+        //    return false;
+        //}
+        //if ($("#beginDateTime").val() > $("#endDateTime").val())
+        //{
+        //    $("#myAlert").html("<strong>起始时间不能大于结束时间</strong>")
+        //    $("#myAlert").show();
+        //    return false;
+        //}
+        //var postdata = { beginDateTime: "2014-10-11 12:23:12" };
+        //$.ajax({
+        //    dataType: "JSON",
+        //    contentType: "application/json",
+        //    type: "POST",
+        //    url: "/Home/ExportToExcel/",
+        //    data: JSON.stringify(postdata),
+        //    success: function () {
+        //        alert(1);
+        //    }
+        //});
+        var form = $('#exportForm');
+        form.attr("action", "/Home/ExportToExcel/");
+        form.submit();
+    });
+
+    function rowStyle(row, index) {
+        var classes = ['active', 'success', 'info', 'warning', 'danger'];
+
+        if (index % 2 === 0 && index / 2 < classes.length) {
+            return {
+                classes: classes[index / 2]
+            };
+        }
+        return {};
+    }
+</script>
+
