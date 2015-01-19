@@ -138,8 +138,13 @@ namespace Finance.Controllers
 
 
         [HttpPost]
-        public ActionResult Index(HttpPostedFileBase filebase)
+        public ActionResult Index(HttpPostedFileBase filebase, string sourceSelect)
         {
+            if (string.IsNullOrEmpty(sourceSelect) || sourceSelect == "0")
+            {
+                ViewBag.error = "请先选择数据来源";
+                return View();
+            }
             HttpPostedFileBase file = Request.Files["files"];
             string FileName;
             string savePath;

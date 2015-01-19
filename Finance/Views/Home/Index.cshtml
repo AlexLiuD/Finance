@@ -11,11 +11,18 @@
         </a>
         <hr />
         <div class="content">
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <h4>
+                    提示!
+                </h4> <strong>警告!</strong> 导入前请先选择数据来源,只能导入xls和xlsx格式的文件.
+            </div>
             <div>
-                <select class="selectpicker show-tick" data-style="btn-warning" data-width="279px">
-                    <option>京东</option>
-                    <option>一号店</option>
-                    <option>苏宁易购</option>
+                <select class="selectpicker show-tick"  data-width="279px" id="sourceSelect" name="sourceSelect">
+                    <option value="0">--选择数据来源--</option>
+                    <option value="1">京东收款</option>
+                    <option value="2">银联收款</option>
+                    <option value="3">支付宝收款</option>
                 </select>
             </div>
             <br />
@@ -47,26 +54,28 @@
 </div>
 <div class="list-group" id="handleDiv">
     <hr />
-    <a href="#" class="list-group-item active">
+    <a href="#" class="list-group-item active" >
         <h2 class="list-group-item-heading">数据处理...</h2>
     </a>
     <hr />
     <div class="container-fluid">
         <div id="toolbar" class="btn-group">
-            <button type="button" class="btn btn-success">
+            <button type="button" class="btn btn-success" data-loading-text="正在同步数据..." data-complete-text="完成同步数据..." id="synchronousBtn">
                 <i class="glyphicon glyphicon-random"> 同步数据</i>
             </button>
-            <button type="button" class="btn btn-info">
+            <button type="button" class="btn btn-info" data-loading-text="正在更新数据..." data-complete-text="完成更新数据..." id="updateBtn">
                 <i class="glyphicon glyphicon-heart"> 更新数据</i>
             </button>
-            <button type="button" class="btn btn-inverse">
+            <button type="button" class="btn btn-inverse" data-loading-text="正在导出数据..." data-complete-text="完成导出数据..." id="exportBtn">
                 <i class="glyphicon glyphicon-cloud-download"> 导出数据</i>
             </button>
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <table data-toggle="table"
+                <table id="dataTable"
+                       data-toggle="table"
                        data-url="/Home/GetData/"
+                       data-maintain-selected="true"
                        data-click-to-select="true"
                        data-row-style="rowStyle"
                        data-search="true"
@@ -75,12 +84,13 @@
                        data-show-refresh="true"
                        data-show-toggle="true"
                        data-show-columns="true"
+                       data-show-export="true"
+                       data-show-filter="true"
                        data-toolbar="#toolbar"
                        data-pagination="true"
-                       data-page-size=20
-                       data-page-list="[20, 50,100]"
-                       data-query-params="queryParams"
-                       data-height="900">
+                       data-page-size=15
+                       data-page-list="[15,30,50,100]"
+                       data-height="710">
                     <thead>
                         <tr>
                             <th data-field="state" data-checkbox="true"></th>
@@ -148,6 +158,7 @@
     $("#myform").submit(function (e) {
         $("#myLoadingElement").show();
     });
+
     $('.form_datetime').datetimepicker({
         language: 'zh-CN',
         weekStart: 1,
@@ -196,23 +207,53 @@
 
     function rowStyle(row, index) {
         var classes = ['active', 'success', 'info', 'warning', 'danger'];
-
-        if (index % 2 === 0 && index / 2 < classes.length) {
+        
+        //if (index % 2 === 0 && index / 2 < classes.length) {
+        //    return {
+        //        classes: classes[index / 2]
+        //    };
+        //}
+        if (row.客户是否要票 == "是")
+        {
             return {
-                classes: classes[index / 2]
+                classes: 'success'
             };
         }
         return {};
     }
 
-    function queryParams() {
-        return {
-            type: 'owner',
-            sort: '订单号',
-            direction: 'desc',
-            per_page: 20,
-            page: 1
-        };
-    }
+    $("#synchronousBtn").click(function () {
+        $(this).button('loading');
+        $("#updateBtn").prop('disabled', true);
+        $("#exportBtn").prop('disabled', true);
+        $(":input[name='refresh']").prop('disabled', true);
+        $.ajax({
+            type: "get",
+            url: "/Home/GetData/",
+            //data: $("#loginForm").serialize(),
+            error: function (xhr, ajaxOptions, thrownError) {
+                $("#updateBtn").prop('disabled', false);
+                $("#exportBtn").prop('disabled', false);
+                $(":input[name='refresh']").prop('disabled', false);
+                $("#synchronousBtn").button('reset');
+            },
+            success: function (data) {
+                $("#updateBtn").prop('disabled', false);
+                $("#exportBtn").prop('disabled', false);
+                $(":input[name='refresh']").prop('disabled', false);
+                $("#synchronousBtn").button('complete')
+            }
+        });
+        return false;
+    });
+
+    $("#updateBtn").click(function ()
+    {
+        alert(1);
+    })
+
+    $("#exportBtn").click(function () {
+        alert(JSON.stringify($('#dataTable').bootstrapTable('getSelections')));
+    })
 </script>
 

@@ -197,8 +197,12 @@
     <Content Include="Scripts\bootstrap-table\extensions\editable\bootstrap-table-editable.min.js" />
     <Content Include="Scripts\bootstrap-table\extensions\export\bootstrap-table-export.js" />
     <Content Include="Scripts\bootstrap-table\extensions\export\bootstrap-table-export.min.js" />
+    <Content Include="Scripts\bootstrap-table\extensions\export\jquery.base64.js" />
+    <Content Include="Scripts\bootstrap-table\extensions\export\tableExport.js" />
     <Content Include="Scripts\bootstrap-table\extensions\filter\bootstrap-table-filter.js" />
     <Content Include="Scripts\bootstrap-table\extensions\filter\bootstrap-table-filter.min.js" />
+    <Content Include="Scripts\bootstrap-table\extensions\filter\bs-table.js" />
+    <Content Include="Scripts\bootstrap-table\extensions\filter\table-filter.js" />
     <Content Include="Scripts\bootstrap-table\extensions\flatJSON\bootstrap-table-flatJSON.js" />
     <Content Include="Scripts\bootstrap-table\extensions\flatJSON\bootstrap-table-flatJSON.min.js" />
     <Content Include="Scripts\bootstrap-table\locale\bootstrap-table-cs-CZ.js" />
