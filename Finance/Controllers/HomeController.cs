@@ -196,122 +196,172 @@ namespace Finance.Controllers
             }
             DataTable table = myDataSet.Tables["ExcelInfo"].DefaultView.ToTable();
 
-            //引用事务机制，出错时，事物回滚
-            using (TransactionScope transaction = new TransactionScope())
+            #region 使用SqlBulkCopy实现批量导入数据库（该方法可以重构）
+            switch (sourceSelect)
             {
-                SqlConnection connection = new SqlConnection(connectionString);
-                string sql = "delete from Saleorders";
-                connection.Open();
-                SqlCommand cmd = new SqlCommand(sql, connection);
-                cmd.ExecuteNonQuery();
-                // ...用foreach把tab中数据添加到数据库
-                DataTable newDT = new DataTable();
-                newDT.Columns.Add("OrderNum", typeof(string));
-                newDT.Columns.Add("GoodsId", typeof(string));
-                newDT.Columns.Add("GoodsName", typeof(string));
-                newDT.Columns.Add("OrderQuantity", typeof(int));
-                newDT.Columns.Add("Payment", typeof(string));
-                newDT.Columns.Add("OrderTime", typeof(DateTime));
-                newDT.Columns.Add("JdPrice", typeof(decimal));
-                newDT.Columns.Add("OrderAmount", typeof(decimal));
-                newDT.Columns.Add("SettlementAmount", typeof(decimal));
-                newDT.Columns.Add("BalancePayment", typeof(decimal));
-                newDT.Columns.Add("NeedAmount", typeof(decimal));
-                newDT.Columns.Add("OrderStatus", typeof(string));
-                newDT.Columns.Add("OrderType", typeof(string));
-                newDT.Columns.Add("SingleAccount", typeof(string));
-                newDT.Columns.Add("CustomerName", typeof(string));
-                newDT.Columns.Add("CustomerAddress", typeof(string));
-                newDT.Columns.Add("TelPhone", typeof(string));
-                newDT.Columns.Add("OrderRemarks", typeof(string));
-                newDT.Columns.Add("InvoiceType", typeof(string));
-                newDT.Columns.Add("InvoicesHead", typeof(string));
-                newDT.Columns.Add("InvoicesContent", typeof(string));
-                newDT.Columns.Add("MerchantRemark", typeof(string));
-                newDT.Columns.Add("MerchantRemarkRate", typeof(string));
-                newDT.Columns.Add("FreightAmount", typeof(decimal));
-                newDT.Columns.Add("PaymentConfirmTime", typeof(DateTime));
-                newDT.Columns.Add("VATInvoice", typeof(bool));
-                newDT.Columns.Add("TaxpayerIdentificationNum", typeof(string));
-                newDT.Columns.Add("BankAccount", typeof(string));
-                newDT.Columns.Add("Bank", typeof(string));
-                newDT.Columns.Add("RegistrationPhone", typeof(string));
-                newDT.Columns.Add("RegisteredAddress", typeof(string));
-                for (int i = 0; i < table.Rows.Count ; i++)
-                {
-                    DataRow newRow = newDT.NewRow();
-                    newRow["OrderNum"] = table.Rows[i][0].ToString().Trim();
-                    newRow["GoodsId"] = table.Rows[i][1].ToString().Trim();
-                    newRow["GoodsName"] = table.Rows[i][2].ToString().Trim();
-                    newRow["OrderQuantity"] = string.IsNullOrEmpty(table.Rows[i][3].ToString().Trim()) ? 0 : int.Parse(table.Rows[i][3].ToString().Trim());
-                    newRow["Payment"] = table.Rows[i][4].ToString().Trim();
-                    newRow["OrderTime"] = string.IsNullOrEmpty(table.Rows[i][5].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][5].ToString().Trim());
-                    newRow["JdPrice"] = string.IsNullOrEmpty(table.Rows[i][6].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][6].ToString().Trim());
-                    newRow["OrderAmount"] = string.IsNullOrEmpty(table.Rows[i][7].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][7].ToString().Trim());
-                    newRow["SettlementAmount"] = string.IsNullOrEmpty(table.Rows[i][8].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][8].ToString().Trim());
-                    newRow["BalancePayment"] = string.IsNullOrEmpty(table.Rows[i][9].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][9].ToString().Trim());
-                    newRow["NeedAmount"] = string.IsNullOrEmpty(table.Rows[i][10].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][10].ToString().Trim());
-                    newRow["OrderStatus"] = table.Rows[i][11].ToString().Trim();
-                    newRow["OrderType"] = table.Rows[i][12].ToString().Trim();
-                    newRow["SingleAccount"] = table.Rows[i][13].ToString().Trim();
-                    newRow["CustomerName"] = table.Rows[i][14].ToString().Trim();
-                    newRow["CustomerAddress"] = table.Rows[i][15].ToString().Trim();
-                    newRow["TelPhone"] = table.Rows[i][16].ToString().Trim();
-                    newRow["OrderRemarks"] = table.Rows[i][17].ToString().Trim();
-                    newRow["InvoiceType"] = table.Rows[i][18].ToString().Trim();
-                    newRow["InvoicesHead"] = table.Rows[i][19].ToString().Trim();
-                    newRow["InvoicesContent"] = table.Rows[i][20].ToString().Trim();
-                    newRow["MerchantRemark"] = table.Rows[i][21].ToString().Trim();
-                    newRow["MerchantRemarkRate"] = table.Rows[i][22].ToString().Trim();
-                    newRow["FreightAmount"] = string.IsNullOrEmpty(table.Rows[i][23].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][23].ToString().Trim());
-                    newRow["PaymentConfirmTime"] = string.IsNullOrEmpty(table.Rows[i][24].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][24].ToString().Trim());
-                    var VATInvoice = table.Rows[i][25].ToString().Trim();
-                    string[] VATInvoiceSplit = VATInvoice.Split(',');
-                    newRow["VATInvoice"] = string.IsNullOrEmpty(VATInvoice) ? false : true;
-                    newRow["TaxpayerIdentificationNum"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[0]) ? string.Empty : VATInvoiceSplit[0].Substring(VATInvoiceSplit[0].IndexOf(':') + 1);
-                    newRow["BankAccount"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[1]) ? string.Empty : VATInvoiceSplit[1].Substring(VATInvoiceSplit[1].IndexOf(':') + 1);
-                    newRow["Bank"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[2]) ? string.Empty : VATInvoiceSplit[2].Substring(VATInvoiceSplit[2].IndexOf(':') + 1);
-                    newRow["RegistrationPhone"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[3]) ? string.Empty : VATInvoiceSplit[3].Substring(VATInvoiceSplit[3].IndexOf(':') + 1);
-                    newRow["RegisteredAddress"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[4]) ? string.Empty : VATInvoiceSplit[4].Substring(VATInvoiceSplit[4].IndexOf(':') + 1);
-                    newDT.Rows.Add(newRow);
-                }
-                SqlBulkCopy sqlbulkcopy = new SqlBulkCopy(connectionString, SqlBulkCopyOptions.UseInternalTransaction);
-                sqlbulkcopy.DestinationTableName = "Saleorders";//数据库中的表名
-                sqlbulkcopy.ColumnMappings.Add("OrderNum", "OrderNum");
-                sqlbulkcopy.ColumnMappings.Add("GoodsId", "GoodsId");
-                sqlbulkcopy.ColumnMappings.Add("GoodsName", "GoodsName");
-                sqlbulkcopy.ColumnMappings.Add("OrderQuantity", "OrderQuantity");
-                sqlbulkcopy.ColumnMappings.Add("Payment", "Payment");
-                sqlbulkcopy.ColumnMappings.Add("OrderTime", "OrderTime");
-                sqlbulkcopy.ColumnMappings.Add("JdPrice", "JdPrice");
-                sqlbulkcopy.ColumnMappings.Add("OrderAmount", "OrderAmount");
-                sqlbulkcopy.ColumnMappings.Add("SettlementAmount", "SettlementAmount");
-                sqlbulkcopy.ColumnMappings.Add("BalancePayment", "BalancePayment");
-                sqlbulkcopy.ColumnMappings.Add("NeedAmount", "NeedAmount");
-                sqlbulkcopy.ColumnMappings.Add("OrderStatus", "OrderStatus");
-                sqlbulkcopy.ColumnMappings.Add("OrderType", "OrderType");
-                sqlbulkcopy.ColumnMappings.Add("SingleAccount", "SingleAccount");
-                sqlbulkcopy.ColumnMappings.Add("CustomerName", "CustomerName");
-                sqlbulkcopy.ColumnMappings.Add("CustomerAddress", "CustomerAddress");
-                sqlbulkcopy.ColumnMappings.Add("TelPhone", "TelPhone");
-                sqlbulkcopy.ColumnMappings.Add("OrderRemarks", "OrderRemarks");
-                sqlbulkcopy.ColumnMappings.Add("InvoiceType", "InvoiceType");
-                sqlbulkcopy.ColumnMappings.Add("InvoicesHead", "InvoicesHead");
-                sqlbulkcopy.ColumnMappings.Add("InvoicesContent", "InvoicesContent");
-                sqlbulkcopy.ColumnMappings.Add("MerchantRemark", "MerchantRemark");
-                sqlbulkcopy.ColumnMappings.Add("MerchantRemarkRate", "MerchantRemarkRate");
-                sqlbulkcopy.ColumnMappings.Add("FreightAmount", "FreightAmount");
-                sqlbulkcopy.ColumnMappings.Add("PaymentConfirmTime", "PaymentConfirmTime");
-                sqlbulkcopy.ColumnMappings.Add("VATInvoice", "VATInvoice");
-                sqlbulkcopy.ColumnMappings.Add("TaxpayerIdentificationNum", "TaxpayerIdentificationNum");
-                sqlbulkcopy.ColumnMappings.Add("BankAccount", "BankAccount");
-                sqlbulkcopy.ColumnMappings.Add("Bank", "Bank");
-                sqlbulkcopy.ColumnMappings.Add("RegistrationPhone", "RegistrationPhone");
-                sqlbulkcopy.ColumnMappings.Add("RegisteredAddress", "RegisteredAddress");
-                sqlbulkcopy.WriteToServer(newDT);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
-                conn.Close();
-                transaction.Complete();  
+                #region 京东收款
+                case "1":
+                    //引用事务机制，出错时，事物回滚
+                    using (TransactionScope transaction = new TransactionScope())
+                    {
+                        SqlConnection connection = new SqlConnection(connectionString);
+                        string sql = "delete from JdReceivables";
+                        connection.Open();
+                        SqlCommand cmd = new SqlCommand(sql, connection);
+                        cmd.ExecuteNonQuery();
+                        DataTable newDT = new DataTable();
+                        newDT.Columns.Add("OrderNum", typeof(string));
+                        newDT.Columns.Add("BusinessOccurrenceTime", typeof(DateTime));
+                        newDT.Columns.Add("BusinessNum", typeof(string));
+                        newDT.Columns.Add("MerchantTypeName", typeof(string));
+                        newDT.Columns.Add("BusinessTypeName", typeof(string));
+                        newDT.Columns.Add("FeeTypeName", typeof(string));
+                        newDT.Columns.Add("Amount", typeof(int));
+                        newDT.Columns.Add("GoodsTotalAmount", typeof(decimal));
+                        newDT.Columns.Add("SettlementAmount", typeof(decimal));
+                        newDT.Columns.Add("ProductCode", typeof(string));
+                        newDT.Columns.Add("ProductName", typeof(string));
+                        newDT.Columns.Add("MerchantDeals", typeof(decimal));
+                        newDT.Columns.Add("DeductionRate", typeof(decimal));
+                        newDT.Columns.Add("Remark", typeof(string));
+                        for (int i = 0; i < table.Rows.Count; i++)
+                        {
+                            DataRow newRow = newDT.NewRow();
+                            newRow["OrderNum"] = table.Rows[i][0].ToString().Trim();
+                            newRow["BusinessOccurrenceTime"] = string.IsNullOrEmpty(table.Rows[i][1].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][1].ToString().Trim());
+                            newRow["BusinessNum"] = table.Rows[i][2].ToString().Trim();
+                            newRow["MerchantTypeName"] = table.Rows[i][3].ToString().Trim();
+                            newRow["BusinessTypeName"] = table.Rows[i][4].ToString().Trim();
+                            newRow["FeeTypeName"] = table.Rows[i][5].ToString().Trim();
+                            newRow["Amount"] = string.IsNullOrEmpty(table.Rows[i][6].ToString().Trim()) ? 0 : int.Parse(table.Rows[i][6].ToString().Trim());
+                            newRow["GoodsTotalAmount"] = string.IsNullOrEmpty(table.Rows[i][7].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][7].ToString().Trim());
+                            newRow["SettlementAmount"] = string.IsNullOrEmpty(table.Rows[i][8].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][8].ToString().Trim());
+                            newRow["ProductCode"] = table.Rows[i][9].ToString().Trim();
+                            newRow["ProductName"] = table.Rows[i][10].ToString().Trim();
+                            newRow["MerchantDeals"] = string.IsNullOrEmpty(table.Rows[i][11].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][11].ToString().Trim());
+                            newRow["DeductionRate"] = string.IsNullOrEmpty(table.Rows[i][12].ToString().Trim()) || table.Rows[i][12].ToString()=="null"? 0 : decimal.Parse(table.Rows[i][12].ToString().Trim());
+                            newRow["Remark"] = table.Rows[i][13].ToString().Trim();
+                            newDT.Rows.Add(newRow);
+                        }
+                        SqlBulkCopy sqlbulkcopy = new SqlBulkCopy(connectionString, SqlBulkCopyOptions.UseInternalTransaction);
+                        sqlbulkcopy.DestinationTableName = "JdReceivables";//数据库中的表名
+                        foreach (System.Data.DataColumn k in newDT.Columns)
+                        {
+                            sqlbulkcopy.ColumnMappings.Add(k.ColumnName.ToString(), k.ColumnName.ToString());
+                        }
+                        sqlbulkcopy.WriteToServer(newDT);
+                        conn.Close();
+                        transaction.Complete();
+                    }
+                    break;
+                #endregion
+                #region 银联收款
+                case "2":
+                    using (TransactionScope transaction = new TransactionScope())
+                    {
+                        SqlConnection connection = new SqlConnection(connectionString);
+                        string sql = "delete from CupReceivables";
+                        connection.Open();
+                        SqlCommand cmd = new SqlCommand(sql, connection);
+                        cmd.ExecuteNonQuery();
+                        DataTable newDT = new DataTable();
+                        newDT.Columns.Add("LiquidationDate", typeof(DateTime));
+                        newDT.Columns.Add("TransactionDate", typeof(DateTime));
+                        newDT.Columns.Add("TerminalNum", typeof(string));
+                        newDT.Columns.Add("TransactionAmount", typeof(decimal));
+                        newDT.Columns.Add("LiquidationAmount", typeof(decimal));
+                        newDT.Columns.Add("Fee", typeof(decimal));
+                        newDT.Columns.Add("SerialNumber", typeof(string));
+                        newDT.Columns.Add("TransactionType", typeof(string));
+                        newDT.Columns.Add("ReferenceNum", typeof(string));
+                        newDT.Columns.Add("CardNumber", typeof(string));
+                        newDT.Columns.Add("CardType", typeof(string));
+                        newDT.Columns.Add("IssuingBank", typeof(string));
+                        for (int i = 0; i < table.Rows.Count; i++)
+                        {
+                            DataRow newRow = newDT.NewRow();
+                            newRow["LiquidationDate"] = string.IsNullOrEmpty(table.Rows[i][0].ToString().Trim()) ? DateTime.MaxValue : DateTime.ParseExact(table.Rows[i][0].ToString().Trim(), "yyyyMMdd", System.Globalization.CultureInfo.CurrentCulture);
+                            newRow["TransactionDate"] = string.IsNullOrEmpty(table.Rows[i][2].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][2].ToString().Trim());
+                            newRow["TerminalNum"] = table.Rows[i][3].ToString().Trim();
+                            newRow["TransactionAmount"] = string.IsNullOrEmpty(table.Rows[i][4].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][4].ToString().Trim());
+                            newRow["LiquidationAmount"] = string.IsNullOrEmpty(table.Rows[i][5].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][5].ToString().Trim());
+                            newRow["Fee"] = string.IsNullOrEmpty(table.Rows[i][6].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][6].ToString().Trim());
+                            newRow["SerialNumber"] = table.Rows[i][7].ToString().Trim();
+                            newRow["TransactionType"] = table.Rows[i][8].ToString().Trim();
+                            newRow["ReferenceNum"] = table.Rows[i][9].ToString().Trim();
+                            newRow["CardNumber"] = table.Rows[i][10].ToString().Trim();
+                            newRow["CardType"] = table.Rows[i][11].ToString().Trim();
+                            newRow["IssuingBank"] = table.Rows[i][12].ToString().Trim();
+                            newDT.Rows.Add(newRow);
+                        }
+                        SqlBulkCopy sqlbulkcopy = new SqlBulkCopy(connectionString, SqlBulkCopyOptions.UseInternalTransaction);
+                        sqlbulkcopy.DestinationTableName = "CupReceivables";//数据库中的表名
+                        foreach (System.Data.DataColumn k in newDT.Columns)
+                        {
+                            sqlbulkcopy.ColumnMappings.Add(k.ColumnName.ToString(), k.ColumnName.ToString());
+                        }
+                        sqlbulkcopy.WriteToServer(newDT);
+                        conn.Close();
+                        transaction.Complete();
+                    }
+                    break;
+                #endregion
+                #region 支付宝收款
+                case "3":
+                    using (TransactionScope transaction = new TransactionScope())
+                    {
+                        SqlConnection connection = new SqlConnection(connectionString);
+                        string sql = "delete from AlipayReceivables";
+                        connection.Open();
+                        SqlCommand cmd = new SqlCommand(sql, connection);
+                        cmd.ExecuteNonQuery();
+                        DataTable newDT = new DataTable();
+                        newDT.Columns.Add("AccountsSerialNum", typeof(string));
+                        newDT.Columns.Add("BusinessSerialNum", typeof(string));
+                        newDT.Columns.Add("MerchantOrderNumber", typeof(string));
+                        newDT.Columns.Add("ProductName", typeof(string));
+                        newDT.Columns.Add("OccurrenceTime", typeof(DateTime));
+                        newDT.Columns.Add("OtherAccount", typeof(string));
+                        newDT.Columns.Add("IncomeAmount", typeof(decimal));
+                        newDT.Columns.Add("ExpenditureAmount", typeof(decimal));
+                        newDT.Columns.Add("AccountBalance", typeof(decimal));
+                        newDT.Columns.Add("TradingChannels", typeof(string));
+                        newDT.Columns.Add("BusinessType", typeof(string));
+                        newDT.Columns.Add("Remark", typeof(string));
+                        for (int i = 0; i < table.Rows.Count; i++)
+                        {
+                            DataRow newRow = newDT.NewRow();
+                            newRow["AccountsSerialNum"] = table.Rows[i][0].ToString().Trim();
+                            newRow["BusinessSerialNum"] = table.Rows[i][1].ToString().Trim();
+                            newRow["MerchantOrderNumber"] = table.Rows[i][2].ToString().Trim();
+                            newRow["ProductName"] = table.Rows[i][3].ToString().Trim();
+                            newRow["OccurrenceTime"] = string.IsNullOrEmpty(table.Rows[i][4].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][4].ToString().Trim());
+                            newRow["OtherAccount"] = table.Rows[i][5].ToString().Trim();
+                            newRow["IncomeAmount"] = string.IsNullOrEmpty(table.Rows[i][6].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][6].ToString().Trim());
+                            newRow["ExpenditureAmount"] = string.IsNullOrEmpty(table.Rows[i][7].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][7].ToString().Trim());
+                            newRow["AccountBalance"] = string.IsNullOrEmpty(table.Rows[i][8].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][8].ToString().Trim());
+                            newRow["TradingChannels"] = table.Rows[i][9].ToString().Trim();
+                            newRow["BusinessType"] = table.Rows[i][10].ToString().Trim();
+                            newRow["Remark"] = table.Rows[i][11].ToString().Trim();
+                            newDT.Rows.Add(newRow);
+                        }
+                        SqlBulkCopy sqlbulkcopy = new SqlBulkCopy(connectionString, SqlBulkCopyOptions.UseInternalTransaction);
+                        sqlbulkcopy.DestinationTableName = "AlipayReceivables";//数据库中的表名
+                        foreach (System.Data.DataColumn k in newDT.Columns)
+                        {
+                            sqlbulkcopy.ColumnMappings.Add(k.ColumnName.ToString(), k.ColumnName.ToString());
+                        }
+                        sqlbulkcopy.WriteToServer(newDT);
+                        conn.Close();
+                        transaction.Complete();
+                    }
+                    break;
+                #endregion
+                default:
+                    ViewBag.error = "请先选择数据来源";
+                    return View();
             }
+            #endregion
             ViewBag.Success = "导入成功";
             return View();
         }
@@ -369,15 +419,15 @@ namespace Finance.Controllers
         public string GetData()
         {
             DataTable dt = new DataTable();
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                SqlCommand cm = new SqlCommand("JDSaleOrderProcedure", connection);
-                cm.CommandType = CommandType.StoredProcedure;
-                DataSet ds = new DataSet();
-                SqlDataAdapter ad = new SqlDataAdapter(cm);
-                ad.Fill(ds, "SaleOrder");
-                dt = ds.Tables[0];
-            }
+            //using (SqlConnection connection = new SqlConnection(connectionString))
+            //{
+            //    SqlCommand cm = new SqlCommand("JDSaleOrderProcedure", connection);
+            //    cm.CommandType = CommandType.StoredProcedure;
+            //    DataSet ds = new DataSet();
+            //    SqlDataAdapter ad = new SqlDataAdapter(cm);
+            //    ad.Fill(ds, "SaleOrder");
+            //    dt = ds.Tables[0];
+            //}
             return JsonTableHelper.ToJson(dt);
             
         }
