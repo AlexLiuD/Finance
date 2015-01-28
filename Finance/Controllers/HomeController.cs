@@ -5,6 +5,7 @@ using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Transactions;
 using System.Web;
 using System.Web.Configuration;
@@ -19,7 +20,6 @@ namespace Finance.Controllers
     {
         string connectionString = WebConfigurationManager.ConnectionStrings["JDConnectionString"].ToString();
 
-        #region 导入导出
         public ActionResult Index()
         {
             //ViewBag.Success = "导入成功.";
@@ -239,7 +239,7 @@ namespace Finance.Controllers
                             newRow["ProductCode"] = table.Rows[i][9].ToString().Trim();
                             newRow["ProductName"] = table.Rows[i][10].ToString().Trim();
                             newRow["MerchantDeals"] = string.IsNullOrEmpty(table.Rows[i][11].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][11].ToString().Trim());
-                            newRow["DeductionRate"] = string.IsNullOrEmpty(table.Rows[i][12].ToString().Trim()) || table.Rows[i][12].ToString()=="null"? 0 : decimal.Parse(table.Rows[i][12].ToString().Trim());
+                            newRow["DeductionRate"] = string.IsNullOrEmpty(table.Rows[i][12].ToString().Trim()) || table.Rows[i][12].ToString() == "null" ? 0 : decimal.Parse(table.Rows[i][12].ToString().Trim());
                             newRow["Remark"] = table.Rows[i][13].ToString().Trim();
                             newDT.Rows.Add(newRow);
                         }
@@ -288,7 +288,7 @@ namespace Finance.Controllers
                             newRow["Fee"] = string.IsNullOrEmpty(table.Rows[i][6].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][6].ToString().Trim());
                             newRow["SerialNumber"] = table.Rows[i][7].ToString().Trim();
                             newRow["TransactionType"] = table.Rows[i][8].ToString().Trim();
-                            newRow["ReferenceNum"] = table.Rows[i][9].ToString().Trim();
+                            newRow["ReferenceNum"] = "201" + table.Rows[i][9].ToString().Trim();
                             newRow["CardNumber"] = table.Rows[i][10].ToString().Trim();
                             newRow["CardType"] = table.Rows[i][11].ToString().Trim();
                             newRow["IssuingBank"] = table.Rows[i][12].ToString().Trim();
@@ -357,6 +357,98 @@ namespace Finance.Controllers
                     }
                     break;
                 #endregion
+                #region
+                case "4":
+                    using (TransactionScope transaction = new TransactionScope())
+                    {
+                        SqlConnection connection = new SqlConnection(connectionString);
+                        string sql = "delete from Saleorders";
+                        connection.Open();
+                        SqlCommand cmd = new SqlCommand(sql, connection);
+                        cmd.ExecuteNonQuery();
+                        // ...用foreach把tab中数据添加到数据库
+                        DataTable newDT = new DataTable();
+                        newDT.Columns.Add("OrderNum", typeof(string));
+                        newDT.Columns.Add("GoodsId", typeof(string));
+                        newDT.Columns.Add("GoodsName", typeof(string));
+                        newDT.Columns.Add("OrderQuantity", typeof(int));
+                        newDT.Columns.Add("Payment", typeof(string));
+                        newDT.Columns.Add("OrderTime", typeof(DateTime));
+                        newDT.Columns.Add("JdPrice", typeof(decimal));
+                        newDT.Columns.Add("OrderAmount", typeof(decimal));
+                        newDT.Columns.Add("SettlementAmount", typeof(decimal));
+                        newDT.Columns.Add("BalancePayment", typeof(decimal));
+                        newDT.Columns.Add("NeedAmount", typeof(decimal));
+                        newDT.Columns.Add("OrderStatus", typeof(string));
+                        newDT.Columns.Add("OrderType", typeof(string));
+                        newDT.Columns.Add("SingleAccount", typeof(string));
+                        newDT.Columns.Add("CustomerName", typeof(string));
+                        newDT.Columns.Add("CustomerAddress", typeof(string));
+                        newDT.Columns.Add("TelPhone", typeof(string));
+                        newDT.Columns.Add("OrderRemarks", typeof(string));
+                        newDT.Columns.Add("InvoiceType", typeof(string));
+                        newDT.Columns.Add("InvoicesHead", typeof(string));
+                        newDT.Columns.Add("InvoicesContent", typeof(string));
+                        newDT.Columns.Add("MerchantRemark", typeof(string));
+                        newDT.Columns.Add("MerchantRemarkRate", typeof(string));
+                        newDT.Columns.Add("FreightAmount", typeof(decimal));
+                        newDT.Columns.Add("PaymentConfirmTime", typeof(DateTime));
+                        newDT.Columns.Add("VATInvoice", typeof(bool));
+                        newDT.Columns.Add("TaxpayerIdentificationNum", typeof(string));
+                        newDT.Columns.Add("BankAccount", typeof(string));
+                        newDT.Columns.Add("Bank", typeof(string));
+                        newDT.Columns.Add("RegistrationPhone", typeof(string));
+                        newDT.Columns.Add("RegisteredAddress", typeof(string));
+                        for (int i = 0; i < table.Rows.Count; i++)
+                        {
+                            DataRow newRow = newDT.NewRow();
+                            newRow["OrderNum"] = table.Rows[i][0].ToString().Trim();
+                            newRow["GoodsId"] = table.Rows[i][1].ToString().Trim();
+                            newRow["GoodsName"] = table.Rows[i][2].ToString().Trim();
+                            newRow["OrderQuantity"] = string.IsNullOrEmpty(table.Rows[i][3].ToString().Trim()) ? 0 : int.Parse(table.Rows[i][3].ToString().Trim());
+                            newRow["Payment"] = table.Rows[i][4].ToString().Trim();
+                            newRow["OrderTime"] = string.IsNullOrEmpty(table.Rows[i][5].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][5].ToString().Trim());
+                            newRow["JdPrice"] = string.IsNullOrEmpty(table.Rows[i][6].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][6].ToString().Trim());
+                            newRow["OrderAmount"] = string.IsNullOrEmpty(table.Rows[i][7].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][7].ToString().Trim());
+                            newRow["SettlementAmount"] = string.IsNullOrEmpty(table.Rows[i][8].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][8].ToString().Trim());
+                            newRow["BalancePayment"] = string.IsNullOrEmpty(table.Rows[i][9].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][9].ToString().Trim());
+                            newRow["NeedAmount"] = string.IsNullOrEmpty(table.Rows[i][10].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][10].ToString().Trim());
+                            newRow["OrderStatus"] = table.Rows[i][11].ToString().Trim();
+                            newRow["OrderType"] = table.Rows[i][12].ToString().Trim();
+                            newRow["SingleAccount"] = table.Rows[i][13].ToString().Trim();
+                            newRow["CustomerName"] = table.Rows[i][14].ToString().Trim();
+                            newRow["CustomerAddress"] = table.Rows[i][15].ToString().Trim();
+                            newRow["TelPhone"] = table.Rows[i][16].ToString().Trim();
+                            newRow["OrderRemarks"] = table.Rows[i][17].ToString().Trim();
+                            newRow["InvoiceType"] = table.Rows[i][18].ToString().Trim();
+                            newRow["InvoicesHead"] = table.Rows[i][19].ToString().Trim();
+                            newRow["InvoicesContent"] = table.Rows[i][20].ToString().Trim();
+                            newRow["MerchantRemark"] = table.Rows[i][21].ToString().Trim();
+                            newRow["MerchantRemarkRate"] = table.Rows[i][22].ToString().Trim();
+                            newRow["FreightAmount"] = string.IsNullOrEmpty(table.Rows[i][23].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][23].ToString().Trim());
+                            newRow["PaymentConfirmTime"] = string.IsNullOrEmpty(table.Rows[i][24].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][24].ToString().Trim());
+                            var VATInvoice = table.Rows[i][25].ToString().Trim();
+                            string[] VATInvoiceSplit = VATInvoice.Split(',');
+                            newRow["VATInvoice"] = string.IsNullOrEmpty(VATInvoice) ? false : true;
+                            newRow["TaxpayerIdentificationNum"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[0]) ? string.Empty : VATInvoiceSplit[0].Substring(VATInvoiceSplit[0].IndexOf(':') + 1);
+                            newRow["BankAccount"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[1]) ? string.Empty : VATInvoiceSplit[1].Substring(VATInvoiceSplit[1].IndexOf(':') + 1);
+                            newRow["Bank"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[2]) ? string.Empty : VATInvoiceSplit[2].Substring(VATInvoiceSplit[2].IndexOf(':') + 1);
+                            newRow["RegistrationPhone"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[3]) ? string.Empty : VATInvoiceSplit[3].Substring(VATInvoiceSplit[3].IndexOf(':') + 1);
+                            newRow["RegisteredAddress"] = string.IsNullOrEmpty(VATInvoice) ? string.Empty : string.IsNullOrEmpty(VATInvoiceSplit[4]) ? string.Empty : VATInvoiceSplit[4].Substring(VATInvoiceSplit[4].IndexOf(':') + 1);
+                            newDT.Rows.Add(newRow);
+                        }
+                        SqlBulkCopy sqlbulkcopy = new SqlBulkCopy(connectionString, SqlBulkCopyOptions.UseInternalTransaction);
+                        sqlbulkcopy.DestinationTableName = "Saleorders";//数据库中的表名
+                        foreach (System.Data.DataColumn k in newDT.Columns)
+                        {
+                            sqlbulkcopy.ColumnMappings.Add(k.ColumnName.ToString(), k.ColumnName.ToString());
+                        }
+                        sqlbulkcopy.WriteToServer(newDT);
+                        conn.Close();
+                        transaction.Complete();
+                    }
+                    break;
+                #endregion
                 default:
                     ViewBag.error = "请先选择数据来源";
                     return View();
@@ -366,22 +458,168 @@ namespace Finance.Controllers
             return View();
         }
 
-        [HttpPost]
-        public ActionResult ExportToExcel(DateTime? beginDateTime, DateTime? endDateTime)
+        public string GetData()
         {
-            DataTable dt=new DataTable();
+            DataTable dt = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                SqlCommand cm = new SqlCommand("JDSaleOrderProcedure", connection);
+                SqlCommand cm = new SqlCommand("InvoiceFinanceProcedure", connection);
                 cm.CommandType = CommandType.StoredProcedure;
                 DataSet ds = new DataSet();
                 SqlDataAdapter ad = new SqlDataAdapter(cm);
                 ad.Fill(ds, "SaleOrder");
-                dt=ds.Tables[0];
+                dt = ds.Tables[0];
+            }
+            return JsonTableHelper.ToJson(dt);
+
+        }
+
+        /// <summary>
+        /// 获取数据核对结果
+        /// </summary>
+        /// <returns></returns>
+        public string GetDataCheckData()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand cm = new SqlCommand("DataCheckProcedure", connection);
+                cm.CommandType = CommandType.StoredProcedure;
+                DataSet ds = new DataSet();
+                SqlDataAdapter ad = new SqlDataAdapter(cm);
+                ad.Fill(ds, "SaleOrder");
+                dt = ds.Tables[0];
+            }
+            return JsonTableHelper.ToJson(dt);
+
+        }
+
+        [HttpPost]
+        public ActionResult ExportToExcel(DateTime? beginDateTime, DateTime? endDateTime)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand cm = new SqlCommand("FinanceAccountedProcedure", connection);
+                cm.CommandType = CommandType.StoredProcedure;
+                DataSet ds = new DataSet();
+                SqlDataAdapter ad = new SqlDataAdapter(cm);
+                ad.Fill(ds, "SaleOrder");
+                dt = ds.Tables[0];
             }
             if (dt.Rows.Count > 0)
             {
-                VoidExportToExcel("Index", dt, Response);
+                //VoidExportToExcel("Index", dt, Response, "财务入账.xls");
+                Dictionary<int, int> mergeCellNums = new Dictionary<int, int>();
+                mergeCellNums.Add(2, 1);
+                DataTable2Excel(dt, null, "财务入账", mergeCellNums, 0);
+                return RedirectToAction("Index/", "Home");
+            }
+            else
+            {
+                return RedirectToAction("Index/", "Home");
+            }
+        }
+
+
+        /// <summary>
+        /// 导出选中数据
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult ExportSelectToExcel()
+        {
+            DataTable dt = new DataTable();
+            string TradeNoListStr = "," + Request["TradeNoList"] + ","; ;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand cm = new SqlCommand("InvoiceFinanceExportProcedure", connection);
+                cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@TradeNoList", SqlDbType.Text).Value = TradeNoListStr;
+                DataSet ds = new DataSet();
+                SqlDataAdapter ad = new SqlDataAdapter(cm);
+                ad.Fill(ds, "SaleOrder");
+                dt = ds.Tables[0];
+            }
+            if (dt.Rows.Count > 0)
+            {
+                VoidExportToExcel("Index", dt, Response, "财务发票.xls");
+                using (SqlConnection connectionStr = new SqlConnection(connectionString))
+                {
+                    connectionStr.Open();
+                    SqlCommand updataCom = new SqlCommand("UpdataTradeListProcedure", connectionStr);
+                    updataCom.CommandType = CommandType.StoredProcedure;
+                    updataCom.Parameters.Add("@TradeNoList", SqlDbType.Text).Value = TradeNoListStr;
+                    updataCom.ExecuteNonQuery();
+                    connectionStr.Close();
+                }
+                return RedirectToAction("Index/", "Home");
+            }
+            else
+            {
+                return RedirectToAction("Index/", "Home");
+            }
+        }
+
+        /// <summary>
+        /// 导出所有数据
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult ExportAllDataToExcel()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand cm = new SqlCommand("InvoiceFinanceExportProcedure", connection);
+                cm.CommandType = CommandType.StoredProcedure;
+                DataSet ds = new DataSet();
+                SqlDataAdapter ad = new SqlDataAdapter(cm);
+                ad.Fill(ds, "SaleOrder");
+                dt = ds.Tables[0];
+            }
+            if (dt.Rows.Count > 0)
+            {
+                Dictionary<int, int> mergeCellNums = new Dictionary<int, int>();   
+                mergeCellNums.Add(0, 1);  
+                //VoidExportToExcel("Index", dt, Response, "财务发票.xls");
+                DataTable2Excel(dt, null, "财务发票", mergeCellNums, 0);
+                using (SqlConnection connectionStr = new SqlConnection(connectionString))
+                {
+                    connectionStr.Open();
+                    SqlCommand updataCom = new SqlCommand("UpdataTradeListProcedure", connectionStr);
+                    updataCom.CommandType = CommandType.StoredProcedure;
+                    updataCom.ExecuteNonQuery();
+                    connectionStr.Close();
+                }
+                return RedirectToAction("Index/", "Home");
+            }
+            else
+            {
+                return RedirectToAction("Index/", "Home");
+            }
+        }
+
+        /// <summary>
+        /// 导出核对异常数据
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult ExportAbnormalDataToExcel()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand cm = new SqlCommand("DataCheckAbnormalDataExportProcedure", connection);
+                cm.CommandType = CommandType.StoredProcedure;
+                DataSet ds = new DataSet();
+                SqlDataAdapter ad = new SqlDataAdapter(cm);
+                ad.Fill(ds, "SaleOrder");
+                dt = ds.Tables[0];
+            }
+            if (dt.Rows.Count > 0)
+            {
+                VoidExportToExcel("Index", dt, Response, "核对异常数据.xls");
                 return RedirectToAction("Index/", "Home");
             }
             else
@@ -396,7 +634,7 @@ namespace Finance.Controllers
         /// <param name="actionTarget"></param>
         /// <param name="expData"></param>
         /// <param name="bs"></param>
-        public void VoidExportToExcel(string actionTarget, DataTable expData, HttpResponseBase bs)
+        public void VoidExportToExcel(string actionTarget, DataTable expData, HttpResponseBase bs, string filename)
         {
             var grid = new GridView { DataSource = expData };
             grid.DataBind();
@@ -404,7 +642,7 @@ namespace Finance.Controllers
             bs.ContentType = "application/ms-excel";
             bs.Charset = "UTF-8";
             bs.ContentEncoding = System.Text.Encoding.GetEncoding("UTF-8");
-            bs.AddHeader("content-disposition", "attachment; filename=京东数据处理.xls");
+            bs.AddHeader("content-disposition", string.Format("attachment; filename={0}", filename));
             string strStyle = "<style>td{mso-number-format:\"\\@\";}</style>";
             var sw = new StringWriter();
             var htw = new HtmlTextWriter(sw);
@@ -414,22 +652,129 @@ namespace Finance.Controllers
             bs.End();
         }
 
-        #endregion
-
-        public string GetData()
+        /// <summary>  
+        /// 描述：把DataTable内容导出excel并返回客户端   
+        /// </summary>  
+        /// <param name="dtData"></param>  
+        /// <param name="header"></param>  
+        /// <param name="fileName"></param>  
+        /// <param name="mergeCellNums">要合并的列索引字典 格式：列索引-合并模式(合并模式 1 合并相同项、2 合并空项、3 合并相同项及空项)</param>  
+        /// <param name="mergeKey">作为合并项的标记列索引</param>  
+        public static void DataTable2Excel(System.Data.DataTable dtData, TableCell[] header, string fileName, Dictionary<int, int> mergeCellNums, int? mergeKey)
         {
-            DataTable dt = new DataTable();
-            //using (SqlConnection connection = new SqlConnection(connectionString))
-            //{
-            //    SqlCommand cm = new SqlCommand("JDSaleOrderProcedure", connection);
-            //    cm.CommandType = CommandType.StoredProcedure;
-            //    DataSet ds = new DataSet();
-            //    SqlDataAdapter ad = new SqlDataAdapter(cm);
-            //    ad.Fill(ds, "SaleOrder");
-            //    dt = ds.Tables[0];
-            //}
-            return JsonTableHelper.ToJson(dt);
-            
+            GridView gvExport = null;
+            // 当前对话   
+            System.Web.HttpContext curContext = System.Web.HttpContext.Current;
+            // IO用于导出并返回excel文件   
+            System.IO.StringWriter strWriter = null;
+            System.Web.UI.HtmlTextWriter htmlWriter = null;
+
+            if (dtData != null)
+            {
+                // 设置编码和附件格式   
+                curContext.Response.ContentType = "application/vnd.ms-excel";
+                curContext.Response.ContentEncoding = System.Text.Encoding.GetEncoding("gb2312");
+                curContext.Response.Charset = "gb2312";
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    //处理中文名乱码问题  
+                    fileName = System.Web.HttpUtility.UrlEncode(fileName, System.Text.Encoding.UTF8);
+                    curContext.Response.AppendHeader("Content-Disposition", ("attachment;filename=" + (fileName.ToLower().EndsWith(".xls") ? fileName : fileName + ".xls")));
+                }
+                // 导出excel文件   
+                strWriter = new System.IO.StringWriter();
+                htmlWriter = new System.Web.UI.HtmlTextWriter(strWriter);
+
+                // 重新定义一个无分页的GridView   
+                gvExport = new System.Web.UI.WebControls.GridView();
+                gvExport.DataSource = dtData.DefaultView;
+                gvExport.AllowPaging = false;
+                //优化导出数据显示，如身份证、12-1等显示异常问题  
+                gvExport.RowDataBound += new System.Web.UI.WebControls.GridViewRowEventHandler(dgExport_RowDataBound);
+
+                gvExport.DataBind();
+                //处理表头  
+                if (header != null && header.Length > 0)
+                {
+                    gvExport.HeaderRow.Cells.Clear();
+                    gvExport.HeaderRow.Cells.AddRange(header);
+                }
+                //合并单元格  
+                if (mergeCellNums != null && mergeCellNums.Count > 0)
+                {
+                    foreach (int cellNum in mergeCellNums.Keys)
+                    {
+                        MergeRows(gvExport, cellNum, mergeCellNums[cellNum], mergeKey);
+                    }
+                }
+
+                // 返回客户端   
+                gvExport.RenderControl(htmlWriter);
+                curContext.Response.Clear();
+                curContext.Response.Write("<meta http-equiv=\"content-type\" content=\"application/ms-excel; charset=gb2312\"/>" + strWriter.ToString());
+                curContext.Response.End();
+            }
+        }
+        /// <summary>  
+        /// 描述：行绑定事件  
+        /// </summary>  
+        /// <param name="sender"></param>  
+        /// <param name="e"></param>  
+        protected static void dgExport_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                foreach (TableCell cell in e.Row.Cells)
+                {
+                    //优化导出数据显示，如身份证、12-1等显示异常问题  
+                    if (Regex.IsMatch(cell.Text.Trim(), @"^\d{12,}$") || Regex.IsMatch(cell.Text.Trim(), @"^\d+[-]\d+$"))
+                    {
+                        cell.Attributes.Add("style", "vnd.ms-excel.numberformat:@");
+                    }
+                }
+            }
+        }
+
+        /// <summary>     
+        /// 描述：合并GridView列中相同的行   
+        /// </summary>     
+        /// <param   name="gvExport">GridView对象</param>     
+        /// <param   name="cellNum">需要合并的列</param>     
+        /// <param name="mergeMode">合并模式 1 合并相同项、2 合并空项、3 合并相同项及空项</param>  
+        /// <param name="mergeKey">作为合并项的标记列索引</param>  
+        public static void MergeRows(GridView gvExport, int cellNum, int mergeMode, int? mergeKey)
+        {
+            int i = 0, rowSpanNum = 1;
+            System.Drawing.Color alterColor = System.Drawing.Color.LightGray;
+            while (i < gvExport.Rows.Count - 1)
+            {
+                GridViewRow gvr = gvExport.Rows[i];
+                for (++i; i < gvExport.Rows.Count; i++)
+                {
+                    GridViewRow gvrNext = gvExport.Rows[i];
+                    if ((!mergeKey.HasValue || (mergeKey.HasValue && (gvr.Cells[mergeKey.Value].Text.Equals(gvrNext.Cells[mergeKey.Value].Text) || " ".Equals(gvrNext.Cells[mergeKey.Value].Text)))) && ((mergeMode == 1 && gvr.Cells[cellNum].Text == gvrNext.Cells[cellNum].Text) || (mergeMode == 2 && " ".Equals(gvrNext.Cells[cellNum].Text.Trim())) || (mergeMode == 3 && (gvr.Cells[cellNum].Text == gvrNext.Cells[cellNum].Text || " ".Equals(gvrNext.Cells[cellNum].Text.Trim())))))
+                    {
+                        gvrNext.Cells[cellNum].Visible = false;
+                        rowSpanNum++;
+                        gvrNext.BackColor = gvr.BackColor;
+                    }
+                    else
+                    {
+                        gvr.Cells[cellNum].RowSpan = rowSpanNum;
+                        rowSpanNum = 1;
+                        break;
+                    }
+                    if (i == gvExport.Rows.Count - 1)
+                    {
+                        gvr.Cells[cellNum].RowSpan = rowSpanNum;
+                        if (mergeKey.HasValue && cellNum == mergeKey.Value)
+                        {
+                            if (alterColor == System.Drawing.Color.White)
+                                gvr.BackColor = System.Drawing.Color.LightGray;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -484,4 +829,5 @@ namespace Finance.Controllers
             return ToJson(dic);
         }
     }
+
 }

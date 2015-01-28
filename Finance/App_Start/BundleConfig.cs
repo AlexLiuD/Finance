@@ -31,9 +31,9 @@ namespace Finance
             bundles.Add(new ScriptBundle("~/bundles/bootstrap-table").Include(
                         "~/Scripts/bootstrap-table/bootstrap-table.js",
                         "~/Scripts/bootstrap-table/locale/bootstrap-table-zh-CN.js",
-                        "~/Scripts/bootstrap-table/extensions/export/tableExport.js",
-                        "~/Scripts/bootstrap-table/extensions/export/jquery.base64.js",
-                        "~/Scripts/bootstrap-table/extensions/export/bootstrap-table-export.js",
+                        //"~/Scripts/bootstrap-table/extensions/export/tableExport.js",
+                        //"~/Scripts/bootstrap-table/extensions/export/jquery.base64.js",
+                        //"~/Scripts/bootstrap-table/extensions/export/bootstrap-table-export.js",
                         //"~/Scripts/bootstrap-table/extensions/filter/table-filter.js",
                         //"~/Scripts/bootstrap-table/extensions/filter/bs-table.js",
                         //"~/Scripts/bootstrap-table/extensions/filter/bootstrap-table-filter.js",
@@ -45,7 +45,8 @@ namespace Finance
                        "~/Content/bootstrap-datetimepicker.css",
                        "~/Content/top.css",
                        "~/Content/bootstrap-table.css",
-                       "~/Content/bootstrap-select.css"));
+                       "~/Content/bootstrap-select.css",
+                       "~/Content/bootstrap-table-filter.css"));
         }
     }
 }
