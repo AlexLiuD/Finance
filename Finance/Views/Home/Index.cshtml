@@ -159,7 +159,7 @@
                        data-url="/Home/GetDataCheckData/"
                        data-maintain-selected="true"
                        data-click-to-select="true"
-                       data-row-style="rowStyle"
+                       data-row-style="rowCheckStyle"
                        data-search="true"
                        data-sort-name="OrderNum"
                        data-sort-order="desc"
@@ -203,6 +203,16 @@
         if (row.客户是否要票 == "True") {
             return {
                 classes: 'success'
+            };
+        }
+        return {};
+    }
+
+    function rowCheckStyle(row, index) {
+        var classes = ['active', 'success', 'info', 'warning', 'danger'];
+        if (row.state == "0") {
+            return {
+                classes: 'danger'
             };
         }
         return {};
@@ -320,21 +330,18 @@
     }
 
     $('#bInvoiceCheck').click(function () {
-
         $('#dataTable').bootstrapTable('filterBy', {
-            bInvoice: $("#bInvoiceCheck").is(':checked') ? 'True' : 'False',
-            bInvoiceMade: $("#bInvoiceMadeCheck").is(':checked') ? 'True' : 'False'
+            客户是否要票: $("#bInvoiceCheck").is(':checked') ? 'True' : 'False',
+            是否已开票: $("#bInvoiceMadeCheck").is(':checked') ? 'True' : 'False'
         });
     });
     $('#bInvoiceMadeCheck').click(function () {
-
         $('#dataTable').bootstrapTable('filterBy', {
-            bInvoice: $("#bInvoiceCheck").is(':checked') ? 'True' : 'False',
-            bInvoiceMade: $("#bInvoiceMadeCheck").is(':checked') ? 'True' : 'False'
+            客户是否要票: $("#bInvoiceCheck").is(':checked') ? 'True' : 'False',
+            是否已开票: $("#bInvoiceMadeCheck").is(':checked') ? 'True' : 'False'
         });
     });
     $('#stateCheck').click(function () {
-
         $('#dataCheckTable').bootstrapTable('filterBy', {
             state: $("#stateCheck").is(':checked') ? '1' : '0',
         });
