@@ -228,7 +228,7 @@ namespace Finance.Controllers
                         {
                             DataRow newRow = newDT.NewRow();
                             newRow["OrderNum"] = table.Rows[i][0].ToString().Trim();
-                            newRow["BusinessOccurrenceTime"] = string.IsNullOrEmpty(table.Rows[i][1].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][1].ToString().Trim());
+                            newRow["BusinessOccurrenceTime"] = string.IsNullOrEmpty(table.Rows[i][1].ToString().Trim()) ? DateTime.Now : DateTime.Parse(table.Rows[i][1].ToString().Trim());
                             newRow["BusinessNum"] = table.Rows[i][2].ToString().Trim();
                             newRow["MerchantTypeName"] = table.Rows[i][3].ToString().Trim();
                             newRow["BusinessTypeName"] = table.Rows[i][4].ToString().Trim();
@@ -280,8 +280,8 @@ namespace Finance.Controllers
                         for (int i = 0; i < table.Rows.Count; i++)
                         {
                             DataRow newRow = newDT.NewRow();
-                            newRow["LiquidationDate"] = string.IsNullOrEmpty(table.Rows[i][0].ToString().Trim()) ? DateTime.MaxValue : DateTime.ParseExact(table.Rows[i][0].ToString().Trim(), "yyyyMMdd", System.Globalization.CultureInfo.CurrentCulture);
-                            newRow["TransactionDate"] = string.IsNullOrEmpty(table.Rows[i][2].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][2].ToString().Trim());
+                            newRow["LiquidationDate"] = string.IsNullOrEmpty(table.Rows[i][0].ToString().Trim()) ? DateTime.Now : DateTime.ParseExact(table.Rows[i][0].ToString().Trim(), "yyyyMMdd", System.Globalization.CultureInfo.CurrentCulture);
+                            newRow["TransactionDate"] = string.IsNullOrEmpty(table.Rows[i][2].ToString().Trim()) ? DateTime.Now : DateTime.Parse(table.Rows[i][2].ToString().Trim());
                             newRow["TerminalNum"] = table.Rows[i][3].ToString().Trim();
                             newRow["TransactionAmount"] = string.IsNullOrEmpty(table.Rows[i][4].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][4].ToString().Trim());
                             newRow["LiquidationAmount"] = string.IsNullOrEmpty(table.Rows[i][5].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][5].ToString().Trim());
@@ -335,7 +335,7 @@ namespace Finance.Controllers
                             newRow["BusinessSerialNum"] = table.Rows[i][1].ToString().Trim();
                             newRow["MerchantOrderNumber"] = table.Rows[i][2].ToString().Trim();
                             newRow["ProductName"] = table.Rows[i][3].ToString().Trim();
-                            newRow["OccurrenceTime"] = string.IsNullOrEmpty(table.Rows[i][4].ToString().Trim()) ? DateTime.MaxValue : DateTime.Parse(table.Rows[i][4].ToString().Trim());
+                            newRow["OccurrenceTime"] = string.IsNullOrEmpty(table.Rows[i][4].ToString().Trim()) ? DateTime.Now : DateTime.Parse(table.Rows[i][4].ToString().Trim());
                             newRow["OtherAccount"] = table.Rows[i][5].ToString().Trim();
                             newRow["IncomeAmount"] = string.IsNullOrEmpty(table.Rows[i][6].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][6].ToString().Trim());
                             newRow["ExpenditureAmount"] = string.IsNullOrEmpty(table.Rows[i][7].ToString().Trim()) ? 0 : decimal.Parse(table.Rows[i][7].ToString().Trim());
@@ -458,6 +458,11 @@ namespace Finance.Controllers
             return View();
         }
 
+        public ActionResult About()
+        {
+            return View();
+        }
+
         public string GetData()
         {
             DataTable dt = new DataTable();
@@ -494,6 +499,26 @@ namespace Finance.Controllers
 
         }
 
+        /// <summary>
+        /// 获取数据查看结果
+        /// </summary>
+        /// <returns></returns>
+        public string GetDataViewData()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand cm = new SqlCommand("DataViewProcedure", connection);
+                cm.CommandType = CommandType.StoredProcedure;
+                DataSet ds = new DataSet();
+                SqlDataAdapter ad = new SqlDataAdapter(cm);
+                ad.Fill(ds, "SaleOrder");
+                dt = ds.Tables[0];
+            }
+            return JsonTableHelper.ToJson(dt);
+
+        }
+
         [HttpPost]
         public ActionResult ExportToExcel(DateTime? beginDateTime, DateTime? endDateTime)
         {
@@ -511,7 +536,7 @@ namespace Finance.Controllers
             {
                 //VoidExportToExcel("Index", dt, Response, "财务入账.xls");
                 Dictionary<int, int> mergeCellNums = new Dictionary<int, int>();
-                mergeCellNums.Add(2, 1);
+                mergeCellNums.Add(3, 1);
                 DataTable2Excel(dt, null, "财务入账", mergeCellNums, 0);
                 return RedirectToAction("Index/", "Home");
             }
