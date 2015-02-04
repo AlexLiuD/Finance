@@ -13,6 +13,13 @@ using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using JdSdk;
+using JdSdk.Request;
+using JdSdk.Response;
+using JdSdk.Domain.Order;
+using Newtonsoft.Json;
+using JdSdk.Response.Order;
+using JdSdk.Request.Order;
 
 namespace Finance.Controllers
 {
@@ -801,6 +808,24 @@ namespace Finance.Controllers
                 }
             }
         }
+
+        public OrderSearchResponse GetDataFromJdAPI()
+        {
+            OrderSearchRequest orderSearchRequest = new OrderSearchRequest();
+            orderSearchRequest.StartDate = DateTime.Now.ToString();
+            orderSearchRequest.EndDate = DateTime.Now.ToString();
+            orderSearchRequest.OrderState = "WAIT_SELLER_STOCK_OUT";
+            orderSearchRequest.Page = "1";
+            orderSearchRequest.PageSize = "100";
+            orderSearchRequest.OptionalFields = "vat_invoice_info";
+            orderSearchRequest.SortType = "jingdong";
+            orderSearchRequest.DateType = "jingdong";
+
+            IJdClient client = new DefaultJdClient("", "", "");
+
+            OrderSearchResponse response = client.Execute(orderSearchRequest);
+            return response;
+        }
     }
 
     /// <summary>
@@ -854,5 +879,4 @@ namespace Finance.Controllers
             return ToJson(dic);
         }
     }
-
 }
