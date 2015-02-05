@@ -4,7 +4,6 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Transactions;
 using System.Web;
@@ -13,13 +12,6 @@ using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using JdSdk;
-using JdSdk.Request;
-using JdSdk.Response;
-using JdSdk.Domain.Order;
-using Newtonsoft.Json;
-using JdSdk.Response.Order;
-using JdSdk.Request.Order;
 
 namespace Finance.Controllers
 {
@@ -175,6 +167,12 @@ namespace Finance.Controllers
                     return View();
                 }
                 string path = AppDomain.CurrentDomain.BaseDirectory + "uploads/";
+                if (!System.IO.File.Exists(path))
+                {
+
+                    System.IO.FileStream fsnew = System.IO.File.Create(path);
+                    fsnew.Close();
+                }
                 savePath = Path.Combine(path, FileName);
                 file.SaveAs(savePath);
             }
@@ -807,24 +805,6 @@ namespace Finance.Controllers
                     }
                 }
             }
-        }
-
-        public OrderSearchResponse GetDataFromJdAPI()
-        {
-            OrderSearchRequest orderSearchRequest = new OrderSearchRequest();
-            orderSearchRequest.StartDate = DateTime.Now.ToString();
-            orderSearchRequest.EndDate = DateTime.Now.ToString();
-            orderSearchRequest.OrderState = "WAIT_SELLER_STOCK_OUT";
-            orderSearchRequest.Page = "1";
-            orderSearchRequest.PageSize = "100";
-            orderSearchRequest.OptionalFields = "vat_invoice_info";
-            orderSearchRequest.SortType = "jingdong";
-            orderSearchRequest.DateType = "jingdong";
-
-            IJdClient client = new DefaultJdClient("", "", "");
-
-            OrderSearchResponse response = client.Execute(orderSearchRequest);
-            return response;
         }
     }
 
