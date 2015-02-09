@@ -150,6 +150,7 @@ namespace Finance.Controllers
             if (file == null || file.ContentLength <= 0)
             {
                 ViewBag.error = "文件不能为空";
+       
                 return View();
             }
             else

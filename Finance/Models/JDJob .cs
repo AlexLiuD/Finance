@@ -5,6 +5,7 @@ using JdSdk.Response.Order;
 using Quartz;
 using Quartz.Impl;
 using System;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -23,15 +24,15 @@ namespace Finance.Models
 
         //京东
 
-        public static string accessToken = "2dfaa65c-037f-4c55-b1ba-d4b06ff1dcdf";
+        public static string accessToken = ConfigurationManager.AppSettings["accessToken"].ToString();
 
-        public static string appSecret = "a52e6342c14b4c5e9cd515544735b428";
+        public static string appSecret = ConfigurationManager.AppSettings["appSecret"].ToString();
 
-        public static string appKey = "FAEFC2F6E659501B16A912094B098058";
+        public static string appKey = ConfigurationManager.AppSettings["appKey"].ToString();
 
-        public static string serverUrl = "http://gw.api.360buy.com/routerjson";
+        public static string serverUrl = ConfigurationManager.AppSettings["serverUrl"].ToString();
 
-        public static int pageSize = 20;
+        public static int pageSize = int.Parse(ConfigurationManager.AppSettings["pageSize"].ToString());
 
         public void Execute(IJobExecutionContext context)
         {
@@ -157,7 +158,7 @@ namespace Finance.Models
                                 orderSearchRequest.OptionalFields = "vat_invoice_info,logistics_id";
                                 //orderSearchRequest.SortType = "";
                                 //orderSearchRequest.DateType = "";
-                                OrderSearchResponse responseNew = client.Execute(orderSearchRequest);
+                                OrderSearchResponse responseNew = client.Execute(orderSearchRequest, accessToken);
                                 if (!response.IsError)
                                 {
                                     foreach (var orderInfo in responseNew.OrderResult.OrderInfoList)
