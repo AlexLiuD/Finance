@@ -63,30 +63,59 @@
         <h2 class="list-group-item-heading">数据处理(财务开票入账)...</h2>
     </a>
     <hr />
+    <div class="alert alert-warning " id="myAlert" style="display:none">
+        <a href="#" class="close" data-dismiss="alert">
+            &times;
+        </a>
+    </div>
+    <div class="form-group">
+        <label for="beginDateTime" class="col-md-1">起始时间:</label>
+        <div class="input-group date form_datetime col-md-4" data-link-field="beginDateTime" data-date-format="yyyy MM dd -p HH:ii">
+            <input class="form-control" size="16" type="text" value="" readonly>
+            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+        </div>
+        <input type="hidden" id="beginDateTime" value="" />
+    </div>
+    <div class="form-group">
+        <label for="endDateTime" class="col-md-1">结束时间:</label>
+        <div class="input-group date form_datetime col-md-4" data-link-field="endDateTime" data-date-format="yyyy MM dd -p HH:ii">
+            <input class="form-control" size="16" type="text" value="" readonly>
+            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+        </div>
+        <input type="hidden" id="endDateTime" value="" />
+    </div>
     <div class="container-fluid">
         <div id="toolbar" class="btn-group">
-            <button type="button" class="btn btn-success" data-loading-text="正在获取所有数据..." data-complete-text="完成获取所有数据..." id="synchronousBtn">
-                <i class="glyphicon glyphicon-random"> 获取所有数据</i>
+            <select class="selectpicker show-tick" data-width="130px"  id="bInvoiceMadeSelectData" name="bInvoiceMadeSelectData">
+                <option value="0">--是否已开票--</option>
+                <option value="1">是</option>
+                <option value="2">否</option>
+            </select>
+            <select class="selectpicker show-tick" data-width="130px"  id="bLogicSelectData" name="bLogicSelectData">
+                <option value="0">--是否已发货--</option>
+                <option value="1">是</option>
+                <option value="2">否</option>
+            </select>
+            <button type="button" class="btn btn-success" data-loading-text="正在查询数据..." data-complete-text="完成查询数据..." id="synchronousBtn">
+                <i class="glyphicon glyphicon-search"> 查询数据</i>
             </button>
             @*<button type="button" class="btn btn-info disabled" data-loading-text="正在导出数据..." data-complete-text="完成导出数据..." id="updateBtn">
                     <i class="glyphicon glyphicon-heart"> 导出选中数据</i>
                 </button>*@
             <button type="button" class="btn btn-info" data-loading-text="正在导出数据..." data-complete-text="完成导出数据..." id="exportBtn">
-                <i class="glyphicon glyphicon-heart"> 导出财务开票数据</i>
+                <i class="glyphicon glyphicon-save"> 导出财务开票</i>
             </button>
             <button type="button" class="btn btn-inverse" data-loading-text="正在导出数据..." data-complete-text="完成导出数据..." id="exportCWRZBtn">
-                <i class="glyphicon glyphicon-cloud-download"> 导出财务入账数据</i>
+                <i class="glyphicon glyphicon-cloud-download"> 导出财务入账</i>
             </button>
-            <input type="checkbox" id="bInvoiceCheck" style="margin-left:10px">
-            <label for="bInvoiceCheck">客户要票</label>
-            <input type="checkbox" id="bInvoiceMadeCheck">
-            <label for="bInvoiceMadeCheck">已开票</label>
         </div>
         <div class="row-fluid">
             <div class="span12">
                 <table id="dataTable"
                        data-toggle="table"
-                       data-url="/Home/GetData/"
+                       @*data-url="/Home/GetData/"*@
                        data-maintain-selected="true"
                        data-click-to-select="true"
                        data-row-style="rowStyle"
@@ -190,12 +219,26 @@
 <div style="display:none">
     <form action="" class="form-horizontal" role="form" id="exportSelectForm" method="POST">
         <input type="hidden" id="TradeNoList" name="TradeNoList" /><br />
+        <input type="hidden" id="beginDateTimeStr" name="beginDateTimeStr" /><br />
+        <input type="hidden" id="endDateTimeStr" name="endDateTimeStr" /><br />
+        <input type="hidden" id="bInvoiceMade" name="bInvoiceMade" /><br />
+        <input type="hidden" id="bLogic" name="bLogic" /><br />
     </form>
 </div>
 
 <script type="text/javascript">
     $("#myform").submit(function (e) {
         $("#myLoadingElement").show();
+    });
+    $('.form_datetime').datetimepicker({
+        language: 'zh-CN',
+        weekStart: 1,
+        todayBtn: 1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        forceParse: 0,
+        showMeridian: 1
     });
 
     function rowStyle(row, index) {
@@ -219,8 +262,25 @@
     }
 
     $("#synchronousBtn").click(function () {
-        $('#dataTable').bootstrapTable('filterBy', {
-        });
+        $("#myAlert").hide();
+        $("#myAlert").html("")
+        if (!$("#beginDateTime").val()) {
+            $("#myAlert").html("<strong>起始时间不能为空</strong>")
+            $("#myAlert").show();
+            return false;
+        }
+        if (!$("#endDateTime").val()) {
+            $("#myAlert").html("<strong>结束时间不能为空</strong>")
+            $("#myAlert").show();
+            return false;
+        }
+        if ($("#beginDateTime").val() > $("#endDateTime").val())
+        {
+            $("#myAlert").html("<strong>起始时间不能大于结束时间</strong>")
+            $("#myAlert").show();
+            return false;
+        }
+        $('#dataTable').bootstrapTable('refresh', { url: "/Home/GetData/?beginDateTime=" + $("#beginDateTime").val() + "&endDateTime=" + $("#endDateTime").val() + "&bInvoiceMade=" + $("#bInvoiceMadeSelectData").val() + "&bLogic=" + $("#bLogicSelectData").val() });
     });
 
     $("#updateBtn").click(function () {
@@ -243,12 +303,20 @@
     })
 
     $("#exportBtn").click(function () {
+        $("#beginDateTimeStr").val($("#beginDateTime").val());
+        $("#endDateTimeStr").val($("#endDateTime").val());
+        $("#bInvoiceMade").val($("#bInvoiceMadeSelectData").val());
+        $("#bLogic").val($("#bLogicSelectData").val());
         var form = $('#exportSelectForm');
         form.attr("action", "/Home/ExportAllDataToExcel/");
         form.submit();
     })
 
     $("#exportCWRZBtn").click(function () {
+        $("#beginDateTimeStr").val($("#beginDateTime").val());
+        $("#endDateTimeStr").val($("#endDateTime").val());
+        $("#bInvoiceMade").val($("#bInvoiceMadeSelectData").val());
+        $("#bLogic").val($("#bLogicSelectData").val());
         var form = $('#exportSelectForm');
         form.attr("action", "/Home/ExportToExcel/");
         form.submit();
@@ -285,7 +353,7 @@
                 Source: "支付宝收款",
             });
         }
-        
+
     });
 
 
@@ -329,18 +397,6 @@
         }
     }
 
-    $('#bInvoiceCheck').click(function () {
-        $('#dataTable').bootstrapTable('filterBy', {
-            客户是否要票: $("#bInvoiceCheck").is(':checked') ? 'True' : 'False',
-            是否已开票: $("#bInvoiceMadeCheck").is(':checked') ? 'True' : 'False'
-        });
-    });
-    $('#bInvoiceMadeCheck').click(function () {
-        $('#dataTable').bootstrapTable('filterBy', {
-            客户是否要票: $("#bInvoiceCheck").is(':checked') ? 'True' : 'False',
-            是否已开票: $("#bInvoiceMadeCheck").is(':checked') ? 'True' : 'False'
-        });
-    });
     $('#stateCheck').click(function () {
         $('#dataCheckTable').bootstrapTable('filterBy', {
             state: $("#stateCheck").is(':checked') ? '1' : '0',

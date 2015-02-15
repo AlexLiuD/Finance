@@ -45,8 +45,9 @@
     <Reference Include="Common.Logging.Core">
       <HintPath>..\packages\Common.Logging.Core.3.0.0\lib\net40\Common.Logging.Core.dll</HintPath>
     </Reference>
-    <Reference Include="JdSdk">
-      <HintPath>C:\Users\dell\Downloads\JdSdk2.NET 2014.04.12\NET40\JdSdk.dll</HintPath>
+    <Reference Include="JdSdk, Version=2014.4.12.0, Culture=neutral, PublicKeyToken=c3091b7879647f39, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Users\dell\Desktop\JdSdk.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Quartz">

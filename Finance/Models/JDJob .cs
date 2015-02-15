@@ -11,6 +11,8 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Transactions;
 using System.Web.Configuration;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Finance.Models
 {
@@ -57,17 +59,16 @@ namespace Finance.Models
             }
             //调用京东api
             OrderSearchRequest orderSearchRequest = new OrderSearchRequest();
-            orderSearchRequest.StartDate = DateTime.Now.AddHours(-48).ToString();
-            orderSearchRequest.EndDate = DateTime.Now.ToString();
+            orderSearchRequest.StartDate = DateTime.Now.AddHours(-48).ToString("yyyy-MM-dd hh:mm:ss");
+            orderSearchRequest.EndDate = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
             orderSearchRequest.OrderState = "WAIT_SELLER_STOCK_OUT";
             orderSearchRequest.Page = "1";
             orderSearchRequest.PageSize = pageSize.ToString();
-            orderSearchRequest.OptionalFields = "vat_invoice_info,logistics_id";
+            orderSearchRequest.OptionalFields = "delivery_type,logistics_id,order_state_remark,order_state,order_payment,order_remark,order_id,consignee_info,pay_type,item_info_list,order_source,balance_used,order_total_price,payment_confirm_time,coupon_detail_list,invoice_info,waybill,parent_order_id,freight_price,store_order,modified,order_start_time,pin,return_order,seller_discount,order_seller_price,vender_id,vender_remark,order_type,vat_invoice_info";
             //orderSearchRequest.SortType = "";
             //orderSearchRequest.DateType = "";
             DefaultJdClient client = new DefaultJdClient(serverUrl, appKey, appSecret);
             OrderSearchResponse response = client.Execute(orderSearchRequest, accessToken);
-
             if (!response.IsError)
             {
                 //引用事务机制，出错时，事物回滚
@@ -150,12 +151,12 @@ namespace Finance.Models
                             //循环调用京东api
                             for (int page = 2; (page - 1) * pageSize < response.OrderResult.OrderTotal; page++)
                             {
-                                orderSearchRequest.StartDate = DateTime.Now.AddHours(-48).ToString();
-                                orderSearchRequest.EndDate = DateTime.Now.ToString();
+                                orderSearchRequest.StartDate = DateTime.Now.AddHours(-48).ToString("yyyy-MM-dd hh:mm:ss");
+                                orderSearchRequest.EndDate = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
                                 orderSearchRequest.OrderState = "WAIT_SELLER_STOCK_OUT";
                                 orderSearchRequest.Page = page.ToString();
                                 orderSearchRequest.PageSize = pageSize.ToString();
-                                orderSearchRequest.OptionalFields = "vat_invoice_info,logistics_id";
+                                orderSearchRequest.OptionalFields = "delivery_type,logistics_id,order_state_remark,order_state,order_payment,order_remark,order_id,consignee_info,pay_type,item_info_list,order_source,balance_used,order_total_price,payment_confirm_time,coupon_detail_list,invoice_info,waybill,parent_order_id,freight_price,store_order,modified,order_start_time,pin,return_order,seller_discount,order_seller_price,vender_id,vender_remark,order_type,vat_invoice_info";
                                 //orderSearchRequest.SortType = "";
                                 //orderSearchRequest.DateType = "";
                                 OrderSearchResponse responseNew = client.Execute(orderSearchRequest, accessToken);
@@ -246,13 +247,13 @@ namespace Finance.Models
             newOrderInfoRow["delivery_type"] = orderInfo.DeliveryType;
             newOrderInfoRow["invoice_info"] = orderInfo.InvoiceInfo;
             newOrderInfoRow["order_remark"] = orderInfo.OrderRemark;
-            newOrderInfoRow["order_start_time"] = string.IsNullOrEmpty(orderInfo.OrderStartTime) ? DateTime.Now : DateTime.Parse(orderInfo.OrderStartTime);
-            newOrderInfoRow["order_end_time"] = string.IsNullOrEmpty(orderInfo.OrderEndTime) ? DateTime.Now : DateTime.Parse(orderInfo.OrderEndTime);
-            newOrderInfoRow["modified"] = string.IsNullOrEmpty(orderInfo.Modified) ? DateTime.Now : DateTime.Parse(orderInfo.Modified);
+            newOrderInfoRow["order_start_time"] = string.IsNullOrEmpty(orderInfo.OrderStartTime) ? DateTime.MaxValue.AddMilliseconds(-10) : DateTime.Parse(orderInfo.OrderStartTime);
+            newOrderInfoRow["order_end_time"] = string.IsNullOrEmpty(orderInfo.OrderEndTime) ? DateTime.MaxValue.AddMilliseconds(-10) : DateTime.Parse(orderInfo.OrderEndTime);
+            newOrderInfoRow["modified"] = string.IsNullOrEmpty(orderInfo.Modified) ? DateTime.MaxValue.AddMilliseconds(-10) : DateTime.Parse(orderInfo.Modified);
             newOrderInfoRow["consignee_info"] = orderInfo.ConsigneeInfo;
             newOrderInfoRow["vender_remark"] = orderInfo.VenderRemark;
             newOrderInfoRow["balance_used"] = orderInfo.BalanceUsed;
-            newOrderInfoRow["payment_confirm_time"] = string.IsNullOrEmpty(orderInfo.PaymentConfirmTime) ? DateTime.Now : DateTime.Parse(orderInfo.PaymentConfirmTime);
+            newOrderInfoRow["payment_confirm_time"] = string.IsNullOrEmpty(orderInfo.PaymentConfirmTime) ? DateTime.MaxValue.AddMilliseconds(-10) : DateTime.Parse(orderInfo.PaymentConfirmTime);
             newOrderInfoRow["waybill"] = orderInfo.Waybill;
             newOrderInfoRow["logistics_id"] = orderInfo.LogisticsId;
             newOrderInfoRow["taxpayer_ident"] = orderInfo.VatInvoiceInfo == null ? string.Empty : orderInfo.VatInvoiceInfo.TaxpayerIdent;
@@ -360,7 +361,7 @@ namespace Finance.Models
                 .WithIdentity("trigger1", "group1")//定义name/group
                 .WithDailyTimeIntervalSchedule
                   (s =>
-                     s.WithIntervalInMinutes(1) //每5小时执行一次
+                     s.WithIntervalInHours(12) //每5小时执行一次
                     .OnEveryDay()
                          //.StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(DateTime.Now.Hour,DateTime.Now.Minute))
                     .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(0, 0))  //每天0:00开始

@@ -471,11 +471,43 @@ namespace Finance.Controllers
 
         public string GetData()
         {
+            var beginDateTime = string.IsNullOrEmpty(Request.QueryString["beginDateTime"]) ? DateTime.Now.AddHours(-24) : DateTime.Parse(Request.QueryString["beginDateTime"]);
+            var endDateTime = string.IsNullOrEmpty(Request.QueryString["endDateTime"]) ? DateTime.Now.AddHours(-24) : DateTime.Parse(Request.QueryString["endDateTime"]);
+            int? bInvoiceMade = null;
+            if (Request.QueryString["bInvoiceMade"] == "1")
+            {
+                bInvoiceMade = 1;
+            }
+            else if (Request.QueryString["bInvoiceMade"] == "2")
+            {
+                bInvoiceMade = 0;
+            }
+            else
+            {
+                bInvoiceMade = null;
+            }
+            int? bLogic = null;
+            if (Request.QueryString["bLogic"] == "1")
+            {
+                bLogic = 1;
+            }
+            else if (Request.QueryString["bLogic"] == "2")
+            {
+                bLogic = 0;
+            }
+            else
+            {
+                bLogic = null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand cm = new SqlCommand("InvoiceFinanceProcedure", connection);
                 cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@beginDateTime", SqlDbType.DateTime).Value = beginDateTime;
+                cm.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
+                cm.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
+                cm.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
                 DataSet ds = new DataSet();
                 SqlDataAdapter ad = new SqlDataAdapter(cm);
                 ad.Fill(ds, "SaleOrder");
@@ -526,13 +558,45 @@ namespace Finance.Controllers
         }
 
         [HttpPost]
-        public ActionResult ExportToExcel(DateTime? beginDateTime, DateTime? endDateTime)
+        public ActionResult ExportToExcel()
         {
+            var beginDateTime = string.IsNullOrEmpty(Request["beginDateTimeStr"]) ? DateTime.Now.AddHours(-24) : DateTime.Parse(Request["beginDateTimeStr"]);
+            var endDateTime = string.IsNullOrEmpty(Request["endDateTimeStr"]) ? DateTime.Now.AddHours(-24) : DateTime.Parse(Request["endDateTimeStr"]);
+            int? bInvoiceMade = null;
+            if (Request["bInvoiceMade"] == "1")
+            {
+                bInvoiceMade = 1;
+            }
+            else if (Request["bInvoiceMade"] == "2")
+            {
+                bInvoiceMade = 0;
+            }
+            else
+            {
+                bInvoiceMade = null;
+            }
+            int? bLogic = null;
+            if (Request["bLogic"] == "1")
+            {
+                bLogic = 1;
+            }
+            else if (Request["bLogic"] == "2")
+            {
+                bLogic = 0;
+            }
+            else
+            {
+                bLogic = null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand cm = new SqlCommand("FinanceAccountedProcedure", connection);
                 cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@beginDateTime", SqlDbType.DateTime).Value = beginDateTime;
+                cm.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
+                cm.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
+                cm.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
                 DataSet ds = new DataSet();
                 SqlDataAdapter ad = new SqlDataAdapter(cm);
                 ad.Fill(ds, "SaleOrder");
@@ -599,11 +663,43 @@ namespace Finance.Controllers
         [HttpPost]
         public ActionResult ExportAllDataToExcel()
         {
+            var beginDateTime = string.IsNullOrEmpty(Request["beginDateTimeStr"]) ? DateTime.Now.AddHours(-24) : DateTime.Parse(Request["beginDateTimeStr"]);
+            var endDateTime = string.IsNullOrEmpty(Request["endDateTimeStr"]) ? DateTime.Now.AddHours(-24) : DateTime.Parse(Request["endDateTimeStr"]);
+            int? bInvoiceMade = null;
+            if (Request["bInvoiceMade"] == "1")
+            {
+                bInvoiceMade = 1;
+            }
+            else if (Request["bInvoiceMade"] == "2")
+            {
+                bInvoiceMade = 0;
+            }
+            else
+            {
+                bInvoiceMade = null;
+            }
+            int? bLogic = null;
+            if (Request["bLogic"] == "1")
+            {
+                bLogic = 1;
+            }
+            else if (Request["bLogic"] == "2")
+            {
+                bLogic = 0;
+            }
+            else
+            {
+                bLogic = null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand cm = new SqlCommand("InvoiceFinanceExportProcedure", connection);
                 cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@beginDateTime", SqlDbType.DateTime).Value = beginDateTime;
+                cm.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
+                cm.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
+                cm.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
                 DataSet ds = new DataSet();
                 SqlDataAdapter ad = new SqlDataAdapter(cm);
                 ad.Fill(ds, "SaleOrder");
@@ -620,6 +716,10 @@ namespace Finance.Controllers
                     connectionStr.Open();
                     SqlCommand updataCom = new SqlCommand("UpdataTradeListProcedure", connectionStr);
                     updataCom.CommandType = CommandType.StoredProcedure;
+                    updataCom.Parameters.Add("@beginDateTime", SqlDbType.DateTime).Value = beginDateTime;
+                    updataCom.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
+                    updataCom.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
+                    updataCom.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
                     updataCom.ExecuteNonQuery();
                     connectionStr.Close();
                 }
