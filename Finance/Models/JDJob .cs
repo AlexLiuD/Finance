@@ -361,7 +361,7 @@ namespace Finance.Models
                 .WithIdentity("trigger1", "group1")//定义name/group
                 .WithDailyTimeIntervalSchedule
                   (s =>
-                     s.WithIntervalInHours(12) //每5小时执行一次
+                     s.WithIntervalInHours(6) //每5小时执行一次
                     .OnEveryDay()
                          //.StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(DateTime.Now.Hour,DateTime.Now.Minute))
                     .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(0, 0))  //每天0:00开始

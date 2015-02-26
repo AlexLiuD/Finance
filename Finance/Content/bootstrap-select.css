@@ -41,7 +41,6 @@
 }
 .bootstrap-select.btn-group:not(.input-group-btn),
 .bootstrap-select.btn-group[class*="col-"] {
-  /*float: none;*/
   display: inline-block;
   margin-left: 0;
 }
