@@ -113,6 +113,7 @@ namespace Finance.Models
                         orderInfoDT.Columns.Add("order_type", typeof(string));
                         orderInfoDT.Columns.Add("store_order", typeof(string));
                         orderInfoDT.Columns.Add("bInvoiceMade", typeof(bool));
+                        orderInfoDT.Columns.Add("bFinanceAccounted", typeof(bool));
                         //订单行项目信息
                         DataTable itemInfoDT = new DataTable();
                         itemInfoDT.Columns.Add("order_id", typeof(string));
@@ -267,6 +268,7 @@ namespace Finance.Models
             newOrderInfoRow["order_type"] = string.Empty;
             newOrderInfoRow["store_order"] = string.Empty;
             newOrderInfoRow["bInvoiceMade"] = 0;
+            newOrderInfoRow["bFinanceAccounted"] = 0;
             orderInfoDT.Rows.Add(newOrderInfoRow);
             //订单行项目
             foreach (var itemInfo in orderInfo.ItemInfoList)
@@ -337,6 +339,8 @@ namespace Finance.Models
 
     public class JobScheduler
     {
+        public static int interval = int.Parse(ConfigurationManager.AppSettings["interval"].ToString());
+
         public static void Start()
         {
             //调度器
@@ -361,7 +365,7 @@ namespace Finance.Models
                 .WithIdentity("trigger1", "group1")//定义name/group
                 .WithDailyTimeIntervalSchedule
                   (s =>
-                     s.WithIntervalInHours(6) //每5小时执行一次
+                     s.WithIntervalInHours(interval) //每6小时执行一次
                     .OnEveryDay()
                          //.StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(DateTime.Now.Hour,DateTime.Now.Minute))
                     .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(0, 0))  //每天0:00开始

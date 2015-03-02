@@ -76,8 +76,8 @@
             <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
         </div>
         <input type="hidden" id="beginDateTime" value="" />
-    </div>
-    <div class="form-group">
+        @*</div>
+            <div class="form-group">*@
         <label for="endDateTime" class="col-md-1">结束时间:</label>
         <div class="input-group date form_datetime col-md-4" data-link-field="endDateTime" data-date-format="yyyy MM dd -p HH:ii">
             <input class="form-control" size="16" type="text" value="" readonly>
@@ -85,19 +85,35 @@
             <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
         </div>
         <input type="hidden" id="endDateTime" value="" />
+        <br /><br /><br />
+        <select class="selectpicker show-tick" data-width="200px" id="bInvoiceMadeSelectData" name="bInvoiceMadeSelectData">
+            <option value="0">--是否已开票--</option>
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
+        <select class="selectpicker show-tick" data-width="200px" id="bLogicSelectData" name="bLogicSelectData">
+            <option value="0">--是否已发货--</option>
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
+        <select class="selectpicker show-tick" data-width="200px" id="bFinanceAccountedSelectData" name="bFinanceAccountedSelectData">
+            <option value="0">--是否已入账--</option>
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
     </div>
     <div class="container-fluid">
         <div id="toolbar" class="btn-group">
-            <select class="selectpicker show-tick" data-width="130px"  id="bInvoiceMadeSelectData" name="bInvoiceMadeSelectData">
+            @*<select class="selectpicker show-tick" data-width="130px" id="bInvoiceMadeSelectData" name="bInvoiceMadeSelectData">
                 <option value="0">--是否已开票--</option>
                 <option value="1">是</option>
                 <option value="2">否</option>
             </select>
-            <select class="selectpicker show-tick" data-width="130px"  id="bLogicSelectData" name="bLogicSelectData">
+            <select class="selectpicker show-tick" data-width="130px" id="bLogicSelectData" name="bLogicSelectData">
                 <option value="0">--是否已发货--</option>
                 <option value="1">是</option>
                 <option value="2">否</option>
-            </select>
+            </select>*@
             <button type="button" class="btn btn-success" data-loading-text="正在查询数据..." data-complete-text="完成查询数据..." id="synchronousBtn">
                 <i class="glyphicon glyphicon-search"> 查询数据</i>
             </button>
@@ -151,6 +167,8 @@
                             <th data-sortable="true" data-halign="center" data-align="left" data-field="备注">备注</th>
                             <th data-sortable="true" data-halign="center" data-align="center" data-field="客户是否要票" data-formatter="bInvoiceFormatter">客户是否要票</th>
                             <th data-sortable="true" data-halign="center" data-align="center" data-field="是否已开票" data-formatter="bInvoiceMadeFormatter">是否已开票</th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="是否已发货" data-formatter="bStockOutFormatter">是否已发货</th>
+                            <th data-sortable="true" data-halign="center" data-align="center" data-field="是否已入账" data-formatter="bFinanceAccountedFormatter">是否已入账</th>
                         </tr>
                     </thead>
                 </table>
@@ -218,11 +236,12 @@
 </div>
 <div style="display:none">
     <form action="" class="form-horizontal" role="form" id="exportSelectForm" method="POST">
-        <input type="hidden" id="TradeNoList" name="TradeNoList" /><br />
-        <input type="hidden" id="beginDateTimeStr" name="beginDateTimeStr" /><br />
-        <input type="hidden" id="endDateTimeStr" name="endDateTimeStr" /><br />
-        <input type="hidden" id="bInvoiceMade" name="bInvoiceMade" /><br />
-        <input type="hidden" id="bLogic" name="bLogic" /><br />
+        <input type="hidden" id="TradeNoList" name="TradeNoList" />
+        <input type="hidden" id="beginDateTimeStr" name="beginDateTimeStr" />
+        <input type="hidden" id="endDateTimeStr" name="endDateTimeStr" />
+        <input type="hidden" id="bInvoiceMade" name="bInvoiceMade" />
+        <input type="hidden" id="bLogic" name="bLogic" />
+        <input type="hidden" id="bFinanceAccounted" name="bFinanceAccounted" />
     </form>
 </div>
 
@@ -238,7 +257,9 @@
         todayHighlight: 1,
         startView: 2,
         forceParse: 0,
-        showMeridian: 1
+        minView: 'day'
+
+        //showMeridian: 1
     });
 
     function rowStyle(row, index) {
@@ -274,13 +295,12 @@
             $("#myAlert").show();
             return false;
         }
-        if ($("#beginDateTime").val() > $("#endDateTime").val())
-        {
+        if ($("#beginDateTime").val() > $("#endDateTime").val()) {
             $("#myAlert").html("<strong>起始时间不能大于结束时间</strong>")
             $("#myAlert").show();
             return false;
         }
-        $('#dataTable').bootstrapTable('refresh', { url: "/Home/GetData/?beginDateTime=" + $("#beginDateTime").val() + "&endDateTime=" + $("#endDateTime").val() + "&bInvoiceMade=" + $("#bInvoiceMadeSelectData").val() + "&bLogic=" + $("#bLogicSelectData").val() });
+        $('#dataTable').bootstrapTable('refresh', { url: "/Home/GetData/?beginDateTime=" + $("#beginDateTime").val() + "&endDateTime=" + $("#endDateTime").val() + "&bInvoiceMade=" + $("#bInvoiceMadeSelectData").val() + "&bLogic=" + $("#bLogicSelectData").val() + "&bFinanceAccounted=" + $("#bFinanceAccountedSelectData").val() });
     });
 
     $("#updateBtn").click(function () {
@@ -307,6 +327,7 @@
         $("#endDateTimeStr").val($("#endDateTime").val());
         $("#bInvoiceMade").val($("#bInvoiceMadeSelectData").val());
         $("#bLogic").val($("#bLogicSelectData").val());
+        $("#bFinanceAccounted").val($("#bFinanceAccountedSelectData").val());
         var form = $('#exportSelectForm');
         form.attr("action", "/Home/ExportAllDataToExcel/");
         form.submit();
@@ -317,6 +338,7 @@
         $("#endDateTimeStr").val($("#endDateTime").val());
         $("#bInvoiceMade").val($("#bInvoiceMadeSelectData").val());
         $("#bLogic").val($("#bLogicSelectData").val());
+        $("#bFinanceAccounted").val($("#bFinanceAccountedSelectData").val());
         var form = $('#exportSelectForm');
         form.attr("action", "/Home/ExportToExcel/");
         form.submit();
@@ -372,6 +394,32 @@
     }
 
     function bInvoiceMadeFormatter(value) {
+        if (value == "True") {
+            return '<div  style="color:#009900">' +
+                    '<i class="glyphicon glyphicon-ok"></i>'
+            '</div>';
+        }
+        else {
+            return '<div  style="color:#CC0000 ">' +
+                   '<i class="glyphicon glyphicon-remove"></i>'
+            '</div>';
+        }
+    }
+
+    function bStockOutFormatter(value) {
+        if (value == "True") {
+            return '<div  style="color:#009900">' +
+                    '<i class="glyphicon glyphicon-ok"></i>'
+            '</div>';
+        }
+        else {
+            return '<div  style="color:#CC0000 ">' +
+                   '<i class="glyphicon glyphicon-remove"></i>'
+            '</div>';
+        }
+    }
+
+    function bFinanceAccountedFormatter(value) {
         if (value == "True") {
             return '<div  style="color:#009900">' +
                     '<i class="glyphicon glyphicon-ok"></i>'

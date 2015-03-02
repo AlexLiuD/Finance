@@ -499,6 +499,19 @@ namespace Finance.Controllers
             {
                 bLogic = null;
             }
+            int? bFinanceAccounted = null;
+            if (Request.QueryString["bFinanceAccounted"] == "1")
+            {
+                bFinanceAccounted = 1;
+            }
+            else if (Request.QueryString["bFinanceAccounted"] == "2")
+            {
+                bFinanceAccounted = 0;
+            }
+            else
+            {
+                bFinanceAccounted = null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -508,6 +521,7 @@ namespace Finance.Controllers
                 cm.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
                 cm.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
                 cm.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
+                cm.Parameters.Add("@bFinanceAccounted", SqlDbType.Bit).Value = bFinanceAccounted;
                 DataSet ds = new DataSet();
                 SqlDataAdapter ad = new SqlDataAdapter(cm);
                 ad.Fill(ds, "SaleOrder");
@@ -588,6 +602,19 @@ namespace Finance.Controllers
             {
                 bLogic = null;
             }
+            int? bFinanceAccounted = null;
+            if (Request["bFinanceAccounted"] == "1")
+            {
+                bFinanceAccounted = 1;
+            }
+            else if (Request["bFinanceAccounted"] == "2")
+            {
+                bFinanceAccounted = 0;
+            }
+            else
+            {
+                bFinanceAccounted = null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -597,6 +624,7 @@ namespace Finance.Controllers
                 cm.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
                 cm.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
                 cm.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
+                cm.Parameters.Add("@bFinanceAccounted", SqlDbType.Bit).Value = bFinanceAccounted;
                 DataSet ds = new DataSet();
                 SqlDataAdapter ad = new SqlDataAdapter(cm);
                 ad.Fill(ds, "SaleOrder");
@@ -608,6 +636,19 @@ namespace Finance.Controllers
                 Dictionary<int, int> mergeCellNums = new Dictionary<int, int>();
                 mergeCellNums.Add(3, 1);
                 DataTable2Excel(dt, null, "财务入账", mergeCellNums, 0);
+                using (SqlConnection connectionStr = new SqlConnection(connectionString))
+                {
+                    connectionStr.Open();
+                    SqlCommand updataCom = new SqlCommand("UpdataBFinanceAccounted", connectionStr);
+                    updataCom.CommandType = CommandType.StoredProcedure;
+                    updataCom.Parameters.Add("@beginDateTime", SqlDbType.DateTime).Value = beginDateTime;
+                    updataCom.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
+                    updataCom.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
+                    updataCom.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
+                    updataCom.Parameters.Add("@bFinanceAccounted", SqlDbType.Bit).Value = bFinanceAccounted;
+                    updataCom.ExecuteNonQuery();
+                    connectionStr.Close();
+                }
                 return RedirectToAction("Index/", "Home");
             }
             else
@@ -691,6 +732,19 @@ namespace Finance.Controllers
             {
                 bLogic = null;
             }
+            int? bFinanceAccounted = null;
+            if (Request["bFinanceAccounted"] == "1")
+            {
+                bFinanceAccounted = 1;
+            }
+            else if (Request["bFinanceAccounted"] == "2")
+            {
+                bFinanceAccounted = 0;
+            }
+            else
+            {
+                bFinanceAccounted = null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -700,6 +754,7 @@ namespace Finance.Controllers
                 cm.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
                 cm.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
                 cm.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
+                cm.Parameters.Add("@bFinanceAccounted", SqlDbType.Bit).Value = bFinanceAccounted;
                 DataSet ds = new DataSet();
                 SqlDataAdapter ad = new SqlDataAdapter(cm);
                 ad.Fill(ds, "SaleOrder");
@@ -720,6 +775,7 @@ namespace Finance.Controllers
                     updataCom.Parameters.Add("@endDateTime", SqlDbType.DateTime).Value = endDateTime;
                     updataCom.Parameters.Add("@bInvoiceMade", SqlDbType.Bit).Value = bInvoiceMade;
                     updataCom.Parameters.Add("@bLogic", SqlDbType.Bit).Value = bLogic;
+                    updataCom.Parameters.Add("@bFinanceAccounted", SqlDbType.Bit).Value = bFinanceAccounted;
                     updataCom.ExecuteNonQuery();
                     connectionStr.Close();
                 }
