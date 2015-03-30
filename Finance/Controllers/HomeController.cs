@@ -168,12 +168,12 @@ namespace Finance.Controllers
                     return View();
                 }
                 string path = AppDomain.CurrentDomain.BaseDirectory + "uploads/";
-                if (!System.IO.File.Exists(path))
-                {
+                //if (!System.IO.File.Exists(path))
+                //{
 
-                    System.IO.FileStream fsnew = System.IO.File.Create(path);
-                    fsnew.Close();
-                }
+                //    System.IO.FileStream fsnew = System.IO.File.Create(path);
+                //    fsnew.Close();
+                //}
                 savePath = Path.Combine(path, FileName);
                 file.SaveAs(savePath);
             }

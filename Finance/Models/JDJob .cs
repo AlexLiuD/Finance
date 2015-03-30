@@ -36,6 +36,8 @@ namespace Finance.Models
 
         public static int pageSize = int.Parse(ConfigurationManager.AppSettings["pageSize"].ToString());
 
+        public static string orderState = ConfigurationManager.AppSettings["orderState"].ToString();
+
         public void Execute(IJobExecutionContext context)
         {
             string path = AppDomain.CurrentDomain.BaseDirectory;
@@ -61,7 +63,7 @@ namespace Finance.Models
             OrderSearchRequest orderSearchRequest = new OrderSearchRequest();
             orderSearchRequest.StartDate = DateTime.Now.AddHours(-48).ToString("yyyy-MM-dd hh:mm:ss");
             orderSearchRequest.EndDate = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
-            orderSearchRequest.OrderState = "WAIT_SELLER_STOCK_OUT";
+            orderSearchRequest.OrderState = orderState;
             orderSearchRequest.Page = "1";
             orderSearchRequest.PageSize = pageSize.ToString();
             orderSearchRequest.OptionalFields = "delivery_type,logistics_id,order_state_remark,order_state,order_payment,order_remark,order_id,consignee_info,pay_type,item_info_list,order_source,balance_used,order_total_price,payment_confirm_time,coupon_detail_list,invoice_info,waybill,parent_order_id,freight_price,store_order,modified,order_start_time,pin,return_order,seller_discount,order_seller_price,vender_id,vender_remark,order_type,vat_invoice_info";
@@ -154,7 +156,7 @@ namespace Finance.Models
                             {
                                 orderSearchRequest.StartDate = DateTime.Now.AddHours(-48).ToString("yyyy-MM-dd hh:mm:ss");
                                 orderSearchRequest.EndDate = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
-                                orderSearchRequest.OrderState = "WAIT_SELLER_STOCK_OUT";
+                                orderSearchRequest.OrderState = orderState;
                                 orderSearchRequest.Page = page.ToString();
                                 orderSearchRequest.PageSize = pageSize.ToString();
                                 orderSearchRequest.OptionalFields = "delivery_type,logistics_id,order_state_remark,order_state,order_payment,order_remark,order_id,consignee_info,pay_type,item_info_list,order_source,balance_used,order_total_price,payment_confirm_time,coupon_detail_list,invoice_info,waybill,parent_order_id,freight_price,store_order,modified,order_start_time,pin,return_order,seller_discount,order_seller_price,vender_id,vender_remark,order_type,vat_invoice_info";
@@ -249,7 +251,7 @@ namespace Finance.Models
             newOrderInfoRow["invoice_info"] = orderInfo.InvoiceInfo;
             newOrderInfoRow["order_remark"] = orderInfo.OrderRemark;
             newOrderInfoRow["order_start_time"] = string.IsNullOrEmpty(orderInfo.OrderStartTime) ? DateTime.MaxValue.AddMilliseconds(-10) : DateTime.Parse(orderInfo.OrderStartTime);
-            newOrderInfoRow["order_end_time"] = string.IsNullOrEmpty(orderInfo.OrderEndTime) ? DateTime.MaxValue.AddMilliseconds(-10) : DateTime.Parse(orderInfo.OrderEndTime);
+            newOrderInfoRow["order_end_time"] = string.IsNullOrEmpty(orderInfo.OrderEndTime) ? DateTime.Now : DateTime.Parse(orderInfo.OrderEndTime);
             newOrderInfoRow["modified"] = string.IsNullOrEmpty(orderInfo.Modified) ? DateTime.MaxValue.AddMilliseconds(-10) : DateTime.Parse(orderInfo.Modified);
             newOrderInfoRow["consignee_info"] = orderInfo.ConsigneeInfo;
             newOrderInfoRow["vender_remark"] = orderInfo.VenderRemark;
